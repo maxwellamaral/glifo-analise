@@ -593,9 +593,14 @@ def _generate_tactile_3d(
     pin_height_mm: float = 0.6,
     base_thickness_mm: float = 2.0,
     margin_mm: float = 1.5,
+    full_test: bool = False,
 ) -> pathlib.Path:
     """
     Gera modelo 3D de tira tátil com os glifos da sequência fornecida.
+
+    Quando *full_test=True* ignora *sequence* e gera uma única célula com
+    todos os pinos da resolução efetiva levantados, útil para validar as
+    dimensões físicas antes da impressão.
 
     Geometria:
       - Placa base retangular (base_thickness_mm de espessura).
@@ -605,13 +610,14 @@ def _generate_tactile_3d(
       - Margem (margin_mm) em torno do conjunto de células.
 
     Args:
-        sequence: String com os caracteres ELIS a renderizar.
+        sequence: String com os caracteres ELIS a renderizar (ignorado se full_test).
         candidate: Candidato da lista (dict com 'resolution' e 'spacing_mm').
         profiles: Perfis dos glifos (necessários para _effective_resolution).
         fmt: Formato de saída — 'stl' ou '3mf'.
         pin_height_mm: Altura dos pinos acima da base (padrão: 0.6 mm).
         base_thickness_mm: Espessura da placa-base (padrão: 2.0 mm).
         margin_mm: Margem lateral ao redor da tira (padrão: 1.5 mm).
+        full_test: Se True, gera célula de teste com todos os pinos levantados.
 
     Returns:
         Caminho do arquivo gerado.
@@ -631,21 +637,33 @@ def _generate_tactile_3d(
     eff_res, crop_box = _effective_resolution(profiles, resolution)
     eff_cols, eff_rows = eff_res
 
-    cell_w_mm = (eff_cols - 1) * spacing_mm
-    cell_h_mm = (eff_rows - 1) * spacing_mm
+    # No modo de teste completo usa a resolução DECLARADA (cols × rows),
+    # pois o objetivo é validar as dimensões físicas nominais do hardware,
+    # não as da fonte. Nos glifos reais usa a resolução efetiva (sem pinos mortos).
+    if full_test:
+        render_cols, render_rows = cols, rows
+    else:
+        render_cols, render_rows = eff_cols, eff_rows
 
-    # Renderiza cada glifo da sequência
-    font = ImageFont.truetype(str(FONT_PATH), rows - 2)
-    bitmaps: List[np.ndarray] = []
-    for ch in sequence:
-        cp = ord(ch)
-        if cp in INTENTIONALLY_BLANK:
-            bitmaps.append(np.zeros((eff_rows, eff_cols), dtype=np.uint8))
-        else:
-            bm = _render_bitmap(ch, font, resolution)
-            if crop_box != (0, 0, 0, 0):
-                bm = bm[crop_box[0]:crop_box[1] + 1, crop_box[2]:crop_box[3] + 1]
-            bitmaps.append(bm)
+    cell_w_mm = (render_cols - 1) * spacing_mm
+    cell_h_mm = (render_rows - 1) * spacing_mm
+
+    # Renderiza bitmaps: teste completo ou sequência de glifos
+    if full_test:
+        # Uma única célula com todos os pinos levantados (resolução declarada)
+        bitmaps: List[np.ndarray] = [np.ones((render_rows, render_cols), dtype=np.uint8)]
+    else:
+        font = ImageFont.truetype(str(FONT_PATH), rows - 2)
+        bitmaps = []
+        for ch in sequence:
+            cp = ord(ch)
+            if cp in INTENTIONALLY_BLANK:
+                bitmaps.append(np.zeros((eff_rows, eff_cols), dtype=np.uint8))
+            else:
+                bm = _render_bitmap(ch, font, resolution)
+                if crop_box != (0, 0, 0, 0):
+                    bm = bm[crop_box[0]:crop_box[1] + 1, crop_box[2]:crop_box[3] + 1]
+                bitmaps.append(bm)
 
     n = len(bitmaps)
     total_w = n * cell_w_mm + max(0, n - 1) * GAP_BETWEEN_CELLS_MM
@@ -663,14 +681,15 @@ def _generate_tactile_3d(
     # Pinos
     pin_r = PIN_DIAMETER_MM / 2
     for g_idx, bm in enumerate(bitmaps):
+        bm_rows, bm_cols = bm.shape
         x_off = margin_mm + g_idx * (cell_w_mm + GAP_BETWEEN_CELLS_MM)
-        for r_idx in range(eff_rows):
-            for c_idx in range(eff_cols):
+        for r_idx in range(bm_rows):
+            for c_idx in range(bm_cols):
                 if not bm[r_idx, c_idx]:
                     continue
                 cx = x_off + c_idx * spacing_mm
                 # Inverte verticalmente: linha 0 do bitmap → topo físico (Y máximo)
-                cy = margin_mm + (eff_rows - 1 - r_idx) * spacing_mm
+                cy = margin_mm + (bm_rows - 1 - r_idx) * spacing_mm
                 cz = base_thickness_mm + pin_height_mm / 2
                 pin = trimesh.creation.cylinder(
                     radius=pin_r,
@@ -682,11 +701,14 @@ def _generate_tactile_3d(
 
     combined = trimesh.util.concatenate(meshes)
 
-    # Nome do arquivo: caracteres não alfanuméricos → U+XXXX
-    seq_safe = "".join(
-        c if c.isalnum() else f"U{ord(c):04X}" for c in sequence
-    )
-    fname = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_{seq_safe}.{fmt}"
+    # Nome do arquivo
+    if full_test:
+        fname = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_TESTE_COMPLETO.{fmt}"
+    else:
+        seq_safe = "".join(
+            c if c.isalnum() else f"U{ord(c):04X}" for c in sequence
+        )
+        fname = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_{seq_safe}.{fmt}"
     out = OUTPUT_DIR / fname
     combined.export(str(out))
     return out
@@ -1068,28 +1090,59 @@ def _prompt_tactile_3d(
     if viable:
         prompt = (
             f"\n  Deseja gerar modelo 3D tátil para impressão?\n"
-            f"  [S = este candidato  /  1-{len(viable)} = escolher da lista  /  N = não]: "
+            f"  [S = este candidato  /  1-{len(viable)} = escolher da lista  /"
+            f"  T = glifo de teste (todos os pinos)  /  N = não]: "
         )
     else:
-        prompt = "\n  Deseja gerar modelo 3D tátil para impressão? [S/n]: "
+        prompt = (
+            "\n  Deseja gerar modelo 3D tátil para impressão?\n"
+            "  [S = gerar glifo  /  T = glifo de teste (todos os pinos)  /  N = não]: "
+        )
 
     resp3d = input(prompt).strip().lower()
 
     if resp3d in ("n", "nao", "não", "no"):
         return
 
-    if viable and resp3d.isdigit():
-        idx = int(resp3d)
-        if 1 <= idx <= len(viable):
-            er = viable[idx - 1]
-            candidate = {"resolution": list(er.resolution), "spacing_mm": er.spacing_mm}
+    # Opção T: glifo de teste dimensional (todos os pinos levantados)
+    full_test = resp3d in ("t", "teste", "test")
+
+    if not full_test:
+        if viable and resp3d.isdigit():
+            idx = int(resp3d)
+            if 1 <= idx <= len(viable):
+                er = viable[idx - 1]
+                candidate = {"resolution": list(er.resolution), "spacing_mm": er.spacing_mm}
+                print(
+                    f"  -> Candidato #{idx} selecionado: "
+                    f"{er.resolution[0]}×{er.resolution[1]} @ {er.spacing_mm:.1f} mm/pino"
+                )
+            else:
+                print(f"  -> Número fora do intervalo (1–{len(viable)}). Usando candidato atual.")
+        elif resp3d not in ("", "s", "sim", "y", "yes"):
+            return
+
+    fmt_resp = input("  Formato [3mf/stl, padrão 3mf]: ").strip().lower()
+    fmt = "stl" if fmt_resp == "stl" else "3mf"
+
+    if full_test:
+        cols, rows = candidate["resolution"]
+        sp = candidate["spacing_mm"]
+        print(
+            f"  Gerando glifo de teste ({fmt.upper()}): "
+            f"{cols}×{rows} pinos (resolução declarada) @ {sp:.1f} mm  "
+            f"→  {(cols-1)*sp:.1f} × {(rows-1)*sp:.1f} mm ..."
+        )
+        try:
+            out = _generate_tactile_3d("", candidate, profiles, fmt=fmt, full_test=True)
+            print(f"  Modelo salvo em: {out.relative_to(pathlib.Path.cwd())}")
             print(
-                f"  -> Candidato #{idx} selecionado: "
-                f"{er.resolution[0]}×{er.resolution[1]} @ {er.spacing_mm:.1f} mm/pino"
+                f"  Dimensões físicas: "
+                f"{(cols-1)*sp:.1f} mm (L) × {(rows-1)*sp:.1f} mm (A)  "
+                f"+ base 2.0 mm de espessura  |  {cols*rows} pinos"
             )
-        else:
-            print(f"  -> Número fora do intervalo (1–{len(viable)}). Usando candidato atual.")
-    elif resp3d not in ("", "s", "sim", "y", "yes"):
+        except Exception as exc:
+            print(f"  [ERRO] Não foi possível gerar o modelo de teste 3D: {exc}")
         return
 
     seq = input(
@@ -1097,9 +1150,6 @@ def _prompt_tactile_3d(
     ).strip()
     if not seq:
         seq = DEFAULT_TACTILE_SEQUENCE
-
-    fmt_resp = input("  Formato [3mf/stl, padrão 3mf]: ").strip().lower()
-    fmt = "stl" if fmt_resp == "stl" else "3mf"
 
     print(f"  Gerando modelo 3D ({fmt.upper()}) para sequência: {seq!r} ...")
     try:
