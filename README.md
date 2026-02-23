@@ -279,10 +279,9 @@ Saídas geradas em `./output/`:
 
 | Arquivo | Conteúdo |
 |---------|----------|
-| `tatil_10x10.png` | Grade visual 10×10 — recomendado 1 dedo (97,6%) |
-| `tatil_10x12.png` | Grade visual 10×12 — melhor candidato sequencial (100%) |
-| `tatil_15x15.png` | Grade visual 15×15 (todos TAMANHO_GRANDE) |
-| `tatil_20x20.png` | Grade visual 20×20 (todos TAMANHO_GRANDE) |
+| `tatil_<M>x<N>_<esp>mm.png` | Grade visual de diagnóstico por candidato |
+| `candidatos_viaveis.json` | Lista de candidatos da análise estendida |
+| `tatil_3d_<M>x<N>_<esp>mm_<seq>.<fmt>` | Modelo 3D tátil para impressão (`.3mf` ou `.stl`) |
 
 ---
 
@@ -293,6 +292,9 @@ Saídas geradas em `./output/`:
 | `Pillow` | ≥ 12.x | Renderização de glifos, geração de grades |
 | `fonttools` | ≥ 4.x | Leitura do `cmap` da fonte TTF |
 | `numpy` | ≥ 2.x | Operações binárias (IoU, densidade, complexidade) |
+| `trimesh` | ≥ 4.x | Geração e exportação de malhas 3D (STL / 3MF) |
+| `networkx` | ≥ 3.x | Exigido pelo trimesh para exportação 3MF |
+| `lxml` | ≥ 6.x | Parser XML para o formato 3MF |
 
 ---
 
@@ -304,12 +306,81 @@ glifo-analise/
 ├── main.py           ← script de análise de viabilidade tátil
 ├── pyproject.toml    ← configuração do projeto (uv)
 ├── output/
-│   ├── tatil_10x10.png   ← grade diagnóstico 1 dedo (recomendada)
-│   ├── tatil_10x12.png   ← grade melhor candidato sequencial
-│   ├── tatil_15x15.png
-│   └── tatil_20x20.png
+│   ├── tatil_<M>x<N>_<esp>mm.png       ← grade visual de diagnóstico
+│   ├── candidatos_viaveis.json         ← lista persistida de candidatos
+│   └── tatil_3d_<M>x<N>_<esp>mm_<seq>.3mf  ← protótipo 3D para impressão
 └── README.md
 ```
+
+---
+
+## Geração de Protótipo 3D Tátil
+
+A partir de qualquer candidato da lista salva, o sistema pode gerar um
+modelo 3D imprimível (.3mf ou .stl) representando uma **tira de glifos ELIS
+com pinos em relevo**, pronta para prototipagem em impressora FDM.
+
+### Fluxo interativo
+
+Após selecionar um candidato da lista e gerar a grade visual, o sistema pergunta:
+
+```
+Deseja gerar modelo 3D tátil para impressão? [S/n]:
+Sequência de glifos ELIS [tqlDà]:        ← Enter usa o padrão
+Formato [3mf/stl, padrão 3mf]:
+```
+
+O mesmo prompt aparece ao final da **análise completa**, sobre o melhor
+candidato sequencial encontrado.
+
+### Geometria do modelo
+
+O modelo é composto por:
+
+- **Placa-base** retangular de 2,0 mm de espessura;
+- **Pinos cilíndricos** de $\varnothing\ 1{,}5\ \text{mm}$ e $0{,}6\ \text{mm}$ de altura
+  em relevo, posicionados apenas nos pixels ativos de cada glifo;
+- **Células** dispostas lado a lado com o `GAP_BETWEEN_CELLS_MM` de separação;
+- **Margem** de 1,5 mm ao redor do conjunto.
+
+A posição de cada pino usa a **resolução efetiva** (pinos mortos eliminados),
+garantindo que o modelo não inclua pinos nunca ativados por nenhum glifo da fonte.
+
+### Exemplo — sequência `tqlDà` no candidato 13×13 @ 2,5 mm
+
+| Parâmetro | Valor |
+|-----------|-------|
+| Resolução efetiva | 10×10 pinos (declarada 13×13) |
+| Dimensões por célula | 22,5 × 22,5 mm |
+| Tira completa (5 glifos) | ≈ 127,5 × 25,5 × 2,6 mm |
+| Arquivo 3MF | 43 KB |
+| Arquivo STL | 295 KB |
+
+### Nomenclatura dos arquivos
+
+```
+tatil_3d_<M>x<N>_<esp>mm_<sequência>.<fmt>
+         │    │      │         │        └─ 3mf ou stl
+         │    │      │         └─ caracteres alfanuméricos ou U+XXXX
+         │    │      └─ espaçamento entre pinos (mm)
+         │    └─ linhas da matriz declarada
+         └─ colunas da matriz declarada
+```
+
+### Parâmetros configuráveis em `_generate_tactile_3d()`
+
+| Parâmetro | Padrão | Descrição |
+|-----------|--------|-----------|
+| `pin_height_mm` | 0,6 mm | Altura dos pinos acima da base |
+| `base_thickness_mm` | 2,0 mm | Espessura da placa-base |
+| `margin_mm` | 1,5 mm | Margem lateral ao redor da tira |
+
+### Compatibilidade com softwares de fatiamento
+
+| Formato | Compatibilidade |
+|---------|-----------------|
+| `.3mf` | Bambu Studio, PrusaSlicer, Cura, OrcaSlicer |
+| `.stl` | Universal — todos os slicers |
 
 ---
 
