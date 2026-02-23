@@ -25,9 +25,10 @@ from glifo_analise.output.persistence import _save_candidates
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
-# Combinações de grade a analisar — igual ao CLI
-_COLS_RANGE = range(5, 22)
-_ROWS_RANGE = range(3, 15)
+# Resoluções a analisar — lista fixa idêntica ao CLI legado
+# (CANDIDATE_RESOLUTIONS + ASYMMETRIC_RESOLUTIONS, sem duplicatas)
+def _get_resolutions() -> list[tuple[int, int]]:
+    return list(dict.fromkeys(config.CANDIDATE_RESOLUTIONS + config.ASYMMETRIC_RESOLUTIONS))
 
 
 def _run_analysis(state: AppState, manager: WebSocketManager, loop: asyncio.AbstractEventLoop) -> None:
@@ -39,11 +40,11 @@ def _run_analysis(state: AppState, manager: WebSocketManager, loop: asyncio.Abst
         codepoints = _collect_mapped_codepoints(config.FONT_PATH)
         profiles = _build_profiles(codepoints, config.FONT_PATH)
         spacings = config.PIN_SPACING_CANDIDATES
+        resolutions = _get_resolutions()
 
         combinations = [
-            (c, r, sp)
-            for c in _COLS_RANGE
-            for r in _ROWS_RANGE
+            (cols, rows, sp)
+            for (cols, rows) in resolutions
             for sp in spacings
         ]
         total = len(combinations)
