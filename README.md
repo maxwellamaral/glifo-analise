@@ -271,9 +271,17 @@ edge = (bm != up) | (bm != down) | (bm != left) | (bm != right)
 ## Execução
 
 ```bash
-uv sync                 # instala dependências
-uv run python main.py   # executa a análise completa
+uv sync                  # instala dependências e registra entry points
+
+uv run glifo-analise     # análise completa via terminal (CLI)
+uv run glifo-gui         # interface gráfica no browser (http://127.0.0.1:8080)
 ```
+
+> **Testes:**
+> ```bash
+> uv run pytest                            # 99 testes (suite completa)
+> uv run pytest --cov=glifo_analise        # com cobertura
+> ```
 
 Saídas geradas em `./output/`:
 
@@ -295,6 +303,14 @@ Saídas geradas em `./output/`:
 | `trimesh` | ≥ 4.x | Geração e exportação de malhas 3D (STL / 3MF) |
 | `networkx` | ≥ 3.x | Exigido pelo trimesh para exportação 3MF |
 | `lxml` | ≥ 6.x | Parser XML para o formato 3MF |
+| `nicegui` | ≥ 2.x | Interface gráfica web (GUI) |
+
+**Dependências de desenvolvimento:**
+
+| Pacote | Versão | Papel |
+|--------|--------|-------|
+| `pytest` | ≥ 8.x | Suite de testes (99 testes) |
+| `pytest-cov` | ≥ 5.x | Relatório de cobertura |
 
 ---
 
@@ -302,14 +318,49 @@ Saídas geradas em `./output/`:
 
 ```
 glifo-analise/
-├── elis.ttf          ← fonte ELIS de sinais (não é fonte de texto)
-├── main.py           ← script de análise de viabilidade tátil
-├── pyproject.toml    ← configuração do projeto (uv)
-├── output/
-│   ├── tatil_<M>x<N>_<esp>mm.png       ← grade visual de diagnóstico
-│   ├── candidatos_viaveis.json         ← lista persistida de candidatos
-│   └── tatil_3d_<M>x<N>_<esp>mm_<seq>.3mf  ← protótipo 3D para impressão
-└── README.md
+├── elis.ttf                  ← fonte ELIS de sinais (não é fonte de texto)
+├── main.py                   ← shim CLI (aponta para glifo_analise.cli.main)
+├── gui.py                    ← shim GUI (aponta para glifo_analise.gui.app)
+├── pyproject.toml            ← configuração do projeto (uv)
+├── glifo_analise/            ← pacote principal
+│   ├── config.py             ← constantes ISO 11548-2 e grupos de glifos
+│   ├── models.py             ← dataclasses: GlyphProfile, ResolutionReport, ExtendedReport
+│   ├── analysis/
+│   │   ├── bitmap.py         ← renderização, densidade, IoU, complexidade de borda
+│   │   ├── physical.py       ← dimensões físicas, capacidade sequencial
+│   │   ├── resolution.py     ← análise básica e estendida (M×N × espaçamento)
+│   │   └── iso.py            ← 9 critérios ISO 11548-2
+│   ├── output/
+│   │   ├── grid.py           ← grade visual PNG de diagnóstico
+│   │   ├── model3d.py        ← geração de STL/3MF
+│   │   ├── persistence.py    ← salvar/carregar candidatos em JSON
+│   │   └── preview.py        ← PNG de pré-visualização do modelo 3D
+│   ├── cli/
+│   │   ├── main.py           ← entry-point CLI
+│   │   ├── display.py        ← tabelas e fichas de candidatos
+│   │   └── prompts.py        ← fluxo interativo (lista salva, geração 3D)
+│   └── gui/
+│       └── app.py            ← interface NiceGUI (4 painéis: Análise, Candidatos,
+│                                Visualização, Modelo 3D)
+├── tests/                    ← 99 testes (TDD Red-Green-Refactor)
+│   ├── conftest.py
+│   ├── test_bitmap.py
+│   ├── test_config.py
+│   ├── test_grid.py
+│   ├── test_iso.py
+│   ├── test_models.py
+│   ├── test_persistence.py
+│   ├── test_physical.py
+│   ├── test_preview.py
+│   └── test_resolution.py
+├── specs/                    ← especificações do projeto
+│   ├── requirements.md
+│   ├── architecture.md
+│   └── roadmap.md
+└── output/                   ← arquivos gerados em runtime
+    ├── tatil_<M>x<N>_<esp>mm.png
+    ├── candidatos_viaveis.json
+    └── tatil_3d_<M>x<N>_<esp>mm_<seq>.3mf
 ```
 
 ---
@@ -320,7 +371,7 @@ A partir de qualquer candidato da lista salva, o sistema pode gerar um
 modelo 3D imprimível (.3mf ou .stl) representando uma **tira de glifos ELIS
 com pinos em relevo**, pronta para prototipagem em impressora FDM.
 
-### Fluxo interativo
+### Fluxo interativo (CLI)
 
 Após selecionar um candidato da lista e gerar a grade visual, o sistema pergunta:
 
@@ -381,6 +432,29 @@ tatil_3d_<M>x<N>_<esp>mm_<sequência>.<fmt>
 |---------|-----------------|
 | `.3mf` | Bambu Studio, PrusaSlicer, Cura, OrcaSlicer |
 | `.stl` | Universal — todos os slicers |
+
+---
+
+## Interface Gráfica (GUI)
+
+A GUI NiceGUI oferece todos os recursos da CLI em uma interface visual
+acessível pelo browser, sem instalar nenhuma ferramenta adicional.
+
+```bash
+uv run glifo-gui    # abre em http://127.0.0.1:8080
+```
+
+### Painéis disponíveis
+
+| Painel | Funcionalidade |
+|--------|----------------|
+| **Análise** | Dispara o pipeline completo com log em streaming linha a linha e barra de progresso por etapa |
+| **Candidatos** | Tabela interativa filtrável e ordenável; recarrega do JSON persistido |
+| **Visualização** | Galeria de todos os PNGs gerados em `output/`; link de download por imagem |
+| **Modelo 3D** | Seleciona candidato, informa sequência e formato (STL/3MF), gera e faz download direto no browser |
+
+> **GUI e CLI compartilham o mesmo núcleo de lógica** — sem duplicação de código.
+> Toda análise reside em `glifo_analise/analysis/` e `glifo_analise/output/`.
 
 ---
 
