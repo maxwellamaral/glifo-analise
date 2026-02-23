@@ -48,18 +48,22 @@ glifos são reproduzíveis respeitando limiares psicofísicos táteis (ISO 11548
 - RF-06.3: Apresentar tabela de candidatos, fichas detalhadas com relatório ISO e
   oferecer geração de modelos 3D ao final.
 
-### RF-07 — Interface gráfica (GUI — NiceGUI)
-- RF-07.1: Painel **Configurações** — editar todos os parâmetros psicofísicos,
-  grupos de glifos ELiS e parâmetros de análise por sessão (sem alterar código-fonte).
-- RF-07.2: Painel **Análise** — disparar análise completa com log em streaming
-  linha a linha; mostrar barra de progresso.
-- RF-07.3: Painel **Candidatos** — tabela interativa filtrável/ordenável; clicar em
-  linha seleciona candidato.
-- RF-07.4: Painel **Visualização** — galeria inline de PNGs gerados (grade e preview
-  3D); clique para ampliar.
-- RF-07.5: Painel **Modelo 3D** — escolha de candidato, sequência de glifos, formato
-  (STL/3MF), geração de teste completo e download direto no browser.
-- RF-07.6: GUI e CLI compartilham o mesmo núcleo de lógica — sem duplicação de código.
+### RF-07 — Interface gráfica (GUI — Vue 3 + FastAPI)
+- RF-07.1: Aba **Análise** — disparar análise completa; exibir log linha a linha via
+  WebSocket com barra de progresso em tempo real.
+- RF-07.2: Aba **Candidatos** — tabela interativa filtrável/ordenável; clicar em linha
+  seleciona um candidato e exibe ficha ISO detalhada.
+- RF-07.3: Aba **Visualização** — galeria inline de PNGs gerados (grade + preview tátil);
+  botão para gerar nova imagem a partir de um candidato (tira completa, células individuais
+  ou grade diagnóstica); clique para ampliar.
+- RF-07.4: Aba **Modelo 3D** — escolha de candidato, sequência de glifos (fonte ELIS),
+  formato (STL/3MF), checkbox "teste completo"; visualizador Three.js interativo embutido;
+  download direto do arquivo gerado.
+- RF-07.5: GUI e CLI compartilham o mesmo núcleo de lógica — sem duplicação de código.
+- RF-07.6: O backend FastAPI serve a SPA Vue (arquivos estáticos compilados em
+  `frontend/dist/`) na rota `/`; rotas de API prefixadas em `/api/`.
+- RF-07.7: Progresso de operações longas (análise, geração 3D) comunicado via WebSocket
+  (`/api/ws/progress`), com fallback para polling REST se conexão não disponível.
 
 ---
 
@@ -69,7 +73,7 @@ glifos são reproduzíveis respeitando limiares psicofísicos táteis (ISO 11548
 |----|-----------|-----------|
 | RNF-01 | Desempenho | Análise completa (todos os candidatos × espaçamentos) deve concluir em < 60 s em hardware moderno. |
 | RNF-02 | Desempenho | Cache de resolução efetiva (`_EFF_RES_CACHE`) mantido entre chamadas na mesma sessão. |
-| RNF-03 | Usabilidade | GUI deve abrir automaticamente no browser padrão em `http://localhost:8080`. |
+| RNF-03 | Usabilidade | GUI deve abrir automaticamente no browser padrão em `http://localhost:8080`. O frontend Vue é servido pelo backend FastAPI. |
 | RNF-04 | Usabilidade | CLI deve continuar funcionando de forma idêntica à versão anterior (100% backwards-compatible). |
 | RNF-05 | Manutenibilidade | Nenhuma lógica de análise dentro de arquivos GUI ou CLI — apenas chamadas ao núcleo. |
 | RNF-06 | Manutenibilidade | Cobertura de testes ≥ 80% no núcleo (`analysis/`, `output/`, `models.py`, `config.py`). |

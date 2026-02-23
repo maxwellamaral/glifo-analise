@@ -5,13 +5,15 @@ description = "Análise de viabilidade tátil para dispositivo matricial — fon
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "fastapi>=0.115.0",
     "fonttools>=4.61.1",
     "lxml>=6.0.2",
     "networkx>=3.4.2",
-    "nicegui>=2.0.0",
     "numpy>=2.2.6",
     "pillow>=12.1.1",
+    "python-multipart>=0.0.9",
     "trimesh>=4.11.2",
+    "uvicorn[standard]>=0.30.0",
 ]
 
 [build-system]
@@ -20,12 +22,15 @@ build-backend = "setuptools.build_meta"
 
 [project.scripts]
 glifo-analise = "glifo_analise.cli.main:main"
-glifo-gui     = "glifo_analise.gui.app:run"
+glifo-gui     = "glifo_analise.api.main:run"
 glifo-test    = "_pytest.config:console_main"
 
 [dependency-groups]
 dev = [
+    "anyio>=4.12.1",
+    "httpx>=0.28.1",
     "pytest>=8.0",
+    "pytest-anyio>=0.0.0",
     "pytest-cov>=5.0",
 ]
 

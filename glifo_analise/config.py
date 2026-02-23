@@ -59,6 +59,11 @@ ISO_MIN_GAP_MM: float = PIN_SPACING_MM - PIN_DIAMETER_MM  # 1,0 mm
 
 MAX_CELL_ASPECT_RATIO: float = 2.5    # proporção máxima W/H da célula
 
+# ---------------------------------------------------------------------------
+# Sequência tátil padrão (visualização e modelos 3D)
+# ---------------------------------------------------------------------------
+DEFAULT_TACTILE_SEQUENCE: str = "tqlDà"
+
 ASYMMETRIC_RESOLUTIONS: List[Tuple[int, int]] = [
     (8,  8),
     (8, 10), (10,  8),

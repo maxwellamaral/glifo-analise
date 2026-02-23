@@ -274,12 +274,24 @@ edge = (bm != up) | (bm != down) | (bm != left) | (bm != right)
 uv sync                  # instala dependências e registra entry points
 
 uv run glifo-analise     # análise completa via terminal (CLI)
-uv run glifo-gui         # interface gráfica no browser (http://127.0.0.1:8080)
+uv run glifo-gui         # interface gráfica no browser (http://localhost:8080)
+```
+
+**Scripts de conveniência:**
+
+| Script | Modo | Descrição |
+|--------|------|-----------|
+| `./start.sh` | Produção | Sobe o FastAPI servindo o `frontend/dist/` em http://localhost:8080 (compila o frontend automaticamente se necessário) |
+| `./dev.sh` | Desenvolvimento | Sobe FastAPI (porta 8080) + Vite dev server com hot-reload (porta 5173) |
+
+```bash
+./start.sh   # produção — http://localhost:8080
+./dev.sh     # desenvolvimento — http://localhost:5173 (hot-reload)
 ```
 
 > **Testes:**
 > ```bash
-> uv run pytest                            # 99 testes (suite completa)
+> uv run pytest                            # 146 testes (suite completa)
 > uv run pytest --cov=glifo_analise        # com cobertura
 > ```
 
@@ -303,14 +315,29 @@ Saídas geradas em `./output/`:
 | `trimesh` | ≥ 4.x | Geração e exportação de malhas 3D (STL / 3MF) |
 | `networkx` | ≥ 3.x | Exigido pelo trimesh para exportação 3MF |
 | `lxml` | ≥ 6.x | Parser XML para o formato 3MF |
-| `nicegui` | ≥ 2.x | Interface gráfica web (GUI) |
+| `fastapi` | ≥ 0.115 | Framework REST + WebSocket (backend) |
+| `uvicorn` | ≥ 0.30 | Servidor ASGI (HTTP/WebSocket) |
+| `python-multipart` | ≥ 0.0.9 | Upload de arquivos (FastAPI) |
+
+**Frontend (Node.js / Vite):**
+
+| Pacote | Versão | Papel |
+|--------|--------|-------|
+| `vue` | 3.5.x | Framework reativo (SPA) |
+| `vue-router` | 4.5.x | Roteamento client-side |
+| `pinia` | 2.3.x | Gerenciamento de estado |
+| `axios` | 1.7.x | Cliente HTTP |
+| `three` | 0.172.x | Visualizador 3D no browser |
+| `vite` | 6.x | Bundler + dev server |
 
 **Dependências de desenvolvimento:**
 
 | Pacote | Versão | Papel |
 |--------|--------|-------|
-| `pytest` | ≥ 8.x | Suite de testes (99 testes) |
+| `pytest` | ≥ 8.x | Suite de testes (146 testes) |
 | `pytest-cov` | ≥ 5.x | Relatório de cobertura |
+| `httpx` | ≥ 0.28 | Cliente HTTP para testes de API |
+| `pytest-anyio` | ≥ 0.0 | Suporte async nos testes |
 
 ---
 
@@ -339,10 +366,28 @@ glifo-analise/
 │   │   ├── main.py           ← entry-point CLI
 │   │   ├── display.py        ← tabelas e fichas de candidatos
 │   │   └── prompts.py        ← fluxo interativo (lista salva, geração 3D)
-│   └── gui/
-│       └── app.py            ← interface NiceGUI (4 painéis: Análise, Candidatos,
-│                                Visualização, Modelo 3D)
-├── tests/                    ← 99 testes (TDD Red-Green-Refactor)
+│   ├── gui/
+│   │   └── static/           ← viewer3d.html + Three.js (reutilizado)
+│   └── api/                  ← backend FastAPI
+│       ├── main.py           ← create_app(), run() — serve SPA em /
+│       ├── state.py          ← AppState thread-safe (singleton)
+│       ├── ws.py             ← WebSocketManager (broadcast de progresso)
+│       └── routes/
+│           ├── analysis.py       ← POST /api/analysis/run, GET /api/analysis/status
+│           ├── candidates.py     ← GET /api/candidates
+│           ├── visualization.py  ← POST /api/visualization/generate
+│           ├── model3d.py        ← POST /api/model3d/generate, GET /api/model3d/files
+│           └── files.py          ← GET /output/{filename}
+├── frontend/                 ← SPA Vue 3 + Vite
+│   ├── src/
+│   │   ├── main.ts
+│   │   ├── App.vue           ← layout principal com nav tabs
+│   │   ├── router/index.ts
+│   │   ├── stores/           ← analysis.ts, candidates.ts, model3d.ts (Pinia)
+│   │   └── views/            ← AnalysisView, CandidatesView, VisualizationView, Model3DView
+│   ├── public/static/        ← viewer3d.html + Three.js + elis.ttf
+│   └── dist/                 ← build de produção (gerado por `npm run build`)
+├── tests/                    ← 146 testes (TDD Red-Green-Refactor)
 │   ├── conftest.py
 │   ├── test_bitmap.py
 │   ├── test_config.py
@@ -352,7 +397,11 @@ glifo-analise/
 │   ├── test_persistence.py
 │   ├── test_physical.py
 │   ├── test_preview.py
-│   └── test_resolution.py
+│   ├── test_resolution.py
+│   ├── test_api_analysis.py
+│   ├── test_api_candidates.py
+│   ├── test_api_visualization.py
+│   └── test_api_model3d.py
 ├── specs/                    ← especificações do projeto
 │   ├── requirements.md
 │   ├── architecture.md
@@ -437,23 +486,31 @@ tatil_3d_<M>x<N>_<esp>mm_<sequência>.<fmt>
 
 ## Interface Gráfica (GUI)
 
-A GUI NiceGUI oferece todos os recursos da CLI em uma interface visual
-acessível pelo browser, sem instalar nenhuma ferramenta adicional.
+A interface é uma **SPA Vue 3** servida pelo backend FastAPI em `http://localhost:8080`.
 
 ```bash
-uv run glifo-gui    # abre em http://127.0.0.1:8080
+# 1. Build do frontend (necessário apenas na primeira vez ou após mudanças)
+cd frontend && npm install && npm run build && cd ..
+
+# 2. Iniciar o servidor (backend + frontend juntos)
+uv run glifo-gui    # abre em http://localhost:8080
 ```
 
-### Painéis disponíveis
+### Abas disponíveis
 
-| Painel | Funcionalidade |
-|--------|----------------|
-| **Análise** | Dispara o pipeline completo com log em streaming linha a linha e barra de progresso por etapa |
-| **Candidatos** | Tabela interativa filtrável e ordenável; recarrega do JSON persistido |
-| **Visualização** | Galeria de todos os PNGs gerados em `output/`; link de download por imagem |
-| **Modelo 3D** | Seleciona candidato, informa sequência e formato (STL/3MF), gera e faz download direto no browser |
+| Aba | Funcionalidade |
+|-----|---------------|
+| **Análise** | Dispara o pipeline completo com log em streaming via WebSocket e barra de progresso |
+| **Candidatos** | Tabela interativa de candidatos viáveis; detalhes ISO 11548-2 por candidato |
+| **Visualização** | Gera strip, cells ou grade de glifos em PNG; preview em linha |
+| **Modelo 3D** | Seleciona candidato e sequência, gera STL/3MF e abre o viewer Three.js no browser |
 
-> **GUI e CLI compartilham o mesmo núcleo de lógica** — sem duplicação de código.
+**Arquitetura:**
+- **Backend** `glifo_analise/api/` — FastAPI + WebSocket para progresso em tempo real
+- **Frontend** `frontend/src/` — Vue 3 + Pinia + vue-router, build com Vite
+- **Viewer 3D** — `viewer3d.html` com Three.js embutido (`.3mf` e `.stl`)
+
+> **GUI, CLI e API compartilham o mesmo núcleo de lógica** — sem duplicação de código.
 > Toda análise reside em `glifo_analise/analysis/` e `glifo_analise/output/`.
 
 ---

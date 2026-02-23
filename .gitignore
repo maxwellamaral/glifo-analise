@@ -8,3 +8,18 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Pytest / Coverage
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Frontend — Node.js / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Output artifacts (binaries e imagens geradas)
+output/*.png
+output/*.stl
+output/*.3mf
