@@ -703,15 +703,193 @@ def _generate_tactile_3d(
 
     # Nome do arquivo
     if full_test:
-        fname = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_TESTE_COMPLETO.{fmt}"
+        fname_stem = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_TESTE_COMPLETO"
     else:
         seq_safe = "".join(
             c if c.isalnum() else f"U{ord(c):04X}" for c in sequence
         )
-        fname = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_{seq_safe}.{fmt}"
-    out = OUTPUT_DIR / fname
+        fname_stem = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_{seq_safe}"
+
+    out = OUTPUT_DIR / f"{fname_stem}.{fmt}"
     combined.export(str(out))
+
+    # Gera preview PNG da vista superior
+    _w = cell_w_mm
+    _h = cell_h_mm
+    _mode = (
+        "1-dedo"
+        if _w <= MAX_FINGER_AREA_MM and _h <= MAX_FINGER_AREA_MM
+        else "multi-dedo"
+        if max(_w, _h) <= MAX_MULTI_FINGER_MM
+        else "fora-de-alcance"
+    )
+    _generate_tactile_preview_png(
+        bitmaps=bitmaps,
+        candidate=candidate,
+        render_shape=(render_rows, render_cols),
+        reading_mode=_mode,
+        full_test=full_test,
+        fname_stem=fname_stem,
+        margin_mm=margin_mm,
+        gap_mm=GAP_BETWEEN_CELLS_MM,
+        sequence=sequence,
+    )
+
     return out
+
+
+def _generate_tactile_preview_png(
+    bitmaps: List[np.ndarray],
+    candidate: dict,
+    render_shape: Tuple[int, int],
+    reading_mode: str,
+    full_test: bool,
+    fname_stem: str,
+    margin_mm: float = 1.5,
+    gap_mm: float = GAP_BETWEEN_CELLS_MM,
+    sequence: str = "",
+    px_per_mm: float = 22.0,
+) -> pathlib.Path:
+    """
+    Gera PNG de vista superior (top-view) da tira tátil gerada, acompanhado
+    de um painel com dados técnicos da impressão.
+
+    Args:
+        bitmaps: Lista de arrays 2-D (0/1) com o padrão de pinos de cada glifo.
+        candidate: Dict com 'resolution' e 'spacing_mm'.
+        render_shape: (render_rows, render_cols) realmente usados nos bitmaps.
+        reading_mode: String descritiva do modo tátil.
+        full_test: True se for o glifo de teste completo.
+        fname_stem: Prefixo do nome do arquivo (sem extensão).
+        margin_mm, gap_mm: Margens e gap entre células (mm).
+        sequence: Sequência de glifos (vazia no modo full_test).
+        px_per_mm: Escala em pixels por milímetro.
+    """
+    cols, rows = candidate["resolution"]
+    spacing_mm: float = candidate["spacing_mm"]
+    render_rows, render_cols = render_shape
+    n = len(bitmaps)
+
+    cell_w_mm = (render_cols - 1) * spacing_mm
+    cell_h_mm = (render_rows - 1) * spacing_mm
+    gap_pins_mm = spacing_mm - PIN_DIAMETER_MM
+
+    # ── Dimensões totais da placa (mm → px) ──────────────────────────────────
+    total_strip_w_mm = n * cell_w_mm + max(0, n - 1) * gap_mm + 2 * margin_mm
+    total_strip_h_mm = cell_h_mm + 2 * margin_mm
+
+    def px(mm: float) -> int:
+        return int(round(mm * px_per_mm))
+
+    strip_w_px = px(total_strip_w_mm)
+    strip_h_px = px(total_strip_h_mm)
+    pin_r_px = max(2, int(round(PIN_DIAMETER_MM / 2 * px_per_mm)))
+
+    # ── Painel de informações técnicas ────────────────────────────────────────
+    render_label = f"{'TESTE COMPLETO' if full_test else repr(sequence)}"
+    info_lines = [
+        f"  Resolução declarada : {cols}×{rows}",
+        f"  Resolução de render  : {render_cols}×{render_rows}",
+        f"  Espaç. (pitch)       : {spacing_mm:.1f} mm",
+        f"  Gap entre pinos      : {gap_pins_mm:.1f} mm",
+        f"  Ø pino               : {PIN_DIAMETER_MM:.1f} mm",
+        f"  Cell W               : {cell_w_mm:.1f} mm",
+        f"  Cell H               : {cell_h_mm:.1f} mm",
+        f"  Modo de leitura      : {reading_mode}",
+        f"  Render               : {render_label}",
+        f"  Glifos na tira       : {n}",
+        f"  Escala               : 1 px = {1/px_per_mm:.3f} mm",
+    ]
+
+    # Fonte monospaced para o painel
+    font_sz = 15
+    _MONO_CANDIDATES = [
+        "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeMono.ttf",
+    ]
+    info_font: ImageFont.FreeTypeFont | ImageFont.ImageFont
+    info_font = ImageFont.load_default()
+    for _fp in _MONO_CANDIDATES:
+        try:
+            info_font = ImageFont.truetype(_fp, font_sz)
+            break
+        except OSError:
+            pass
+
+    line_h = font_sz + 6
+    panel_pad = 12
+    panel_h = len(info_lines) * line_h + panel_pad * 2
+
+    # Título da tira (acima da placa)
+    title_h = font_sz + panel_pad * 2
+    total_h = title_h + strip_h_px + panel_h
+    total_w = max(strip_w_px, 520)
+
+    # ── Montagem da imagem ────────────────────────────────────────────────────
+    img = Image.new("RGB", (total_w, total_h), color=(245, 245, 245))
+    draw = ImageDraw.Draw(img)
+
+    # Título
+    title_font = info_font
+    title_txt = fname_stem
+    draw.rectangle([0, 0, total_w, title_h], fill=(45, 45, 60))
+    draw.text((panel_pad, panel_pad), title_txt, fill=(220, 220, 255), font=title_font)
+
+    # Placa base (bege claro)
+    plate_y0 = title_h
+    draw.rectangle(
+        [0, plate_y0, strip_w_px - 1, plate_y0 + strip_h_px - 1],
+        fill=(210, 185, 140),
+    )
+
+    # Bordas de cada célula (indicam os limites físicos de 1 glifo)
+    for g_idx in range(n):
+        x_off_mm = margin_mm + g_idx * (cell_w_mm + gap_mm)
+        half = spacing_mm * 0.45
+        bx0 = px(x_off_mm - half)
+        bx1 = px(x_off_mm + cell_w_mm + half)
+        by0 = plate_y0 + px(margin_mm - half)
+        by1 = plate_y0 + px(margin_mm + cell_h_mm + half)
+        draw.rectangle([bx0, by0, bx1, by1], outline=(160, 130, 80), width=1)
+
+    # Pinos: preenchidos (ativo) ou anel fino (inativo)
+    for g_idx, bm in enumerate(bitmaps):
+        bm_r, bm_c = bm.shape
+        x_off_mm = margin_mm + g_idx * (cell_w_mm + gap_mm)
+        for r_idx in range(bm_r):
+            for c_idx in range(bm_c):
+                cx = px(x_off_mm + c_idx * spacing_mm)
+                # Sem inversão: linha 0 do bitmap → topo da imagem (Y pequeno)
+                cy = plate_y0 + px(margin_mm + r_idx * spacing_mm)
+                bbox = [cx - pin_r_px, cy - pin_r_px, cx + pin_r_px, cy + pin_r_px]
+                if bm[r_idx, c_idx]:
+                    draw.ellipse(bbox, fill=(50, 50, 50))
+                    # Reflexo central (realismo)
+                    hl = max(1, pin_r_px // 3)
+                    draw.ellipse(
+                        [cx - hl, cy - hl, cx + hl, cy + hl],
+                        fill=(130, 130, 130),
+                    )
+                else:
+                    draw.ellipse(bbox, outline=(170, 145, 100), width=1)
+
+    # Painel de dados técnicos
+    panel_y0 = title_h + strip_h_px
+    draw.rectangle([0, panel_y0, total_w - 1, total_h - 1], fill=(28, 28, 38))
+    # Linha separadora
+    draw.line([0, panel_y0, total_w, panel_y0], fill=(80, 80, 120), width=2)
+    for i, line in enumerate(info_lines):
+        draw.text(
+            (0, panel_y0 + panel_pad + i * line_h),
+            line,
+            fill=(180, 230, 180),
+            font=info_font,
+        )
+
+    out_png = OUTPUT_DIR / f"{fname_stem}_preview.png"
+    img.save(str(out_png), dpi=(int(px_per_mm * 25.4), int(px_per_mm * 25.4)))
+    return out_png
 
 
 # ---------------------------------------------------------------------------
@@ -1136,6 +1314,9 @@ def _prompt_tactile_3d(
         try:
             out = _generate_tactile_3d("", candidate, profiles, fmt=fmt, full_test=True)
             print(f"  Modelo salvo em: {out.relative_to(pathlib.Path.cwd())}")
+            png = out.with_name(out.stem + "_preview.png")
+            if png.exists():
+                print(f"  Preview PNG   : {png.relative_to(pathlib.Path.cwd())}")
             print(
                 f"  Dimensões físicas: "
                 f"{(cols-1)*sp:.1f} mm (L) × {(rows-1)*sp:.1f} mm (A)  "
@@ -1155,6 +1336,9 @@ def _prompt_tactile_3d(
     try:
         out = _generate_tactile_3d(seq, candidate, profiles, fmt=fmt)
         print(f"  Modelo salvo em: {out.relative_to(pathlib.Path.cwd())}")
+        png = out.with_name(out.stem + "_preview.png")
+        if png.exists():
+            print(f"  Preview PNG   : {png.relative_to(pathlib.Path.cwd())}")
         cols, rows = candidate["resolution"]
         sp = candidate["spacing_mm"]
         eff_res, _ = _effective_resolution(profiles, (cols, rows))
