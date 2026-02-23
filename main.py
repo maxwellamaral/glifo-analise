@@ -27,7 +27,7 @@ from __future__ import annotations
 import pathlib
 import unicodedata
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import json
 
@@ -107,6 +107,15 @@ GAP_BETWEEN_CELLS_MM: float = 3.0
 # Faixa desejada de glifos por tira sequencial
 SEQ_GLYPH_MIN: int = 4
 SEQ_GLYPH_MAX: int = 6
+
+# Cobertura mínima para classificar um candidato como "econômico" (impressão 3D)
+MIN_COVERAGE_ECONOMY: float = 95.0
+
+# Razão mínima espaçamento/diâmetro do pino (ISO 11548-2 §6.3: gap >= 1,0 mm)
+ISO_MIN_GAP_MM: float = PIN_SPACING_MM - PIN_DIAMETER_MM  # 2,5 - 1,5 = 1,0 mm
+
+# Proporção máxima admissível entre os eixos da célula (relação de aspecto)
+MAX_CELL_ASPECT_RATIO: float = 2.5
 
 # Resoluções assimétricas (M colunas x N linhas) a ser testadas
 ASYMMETRIC_RESOLUTIONS: List[Tuple[int, int]] = [
@@ -870,6 +879,131 @@ def _print_candidates_table(candidates: List[dict]) -> None:
         )
 
 
+def _iso_compliance(er: ExtendedReport) -> List[Tuple[str, bool, str]]:
+    """
+    Avalia conformidade psicofísica e normativa (ISO 11548-2) de um candidato.
+
+    Retorna lista de (criterio, aprovado, detalhe) com todos os pontos verificados.
+    """
+    sp = er.spacing_mm
+    gap = sp - PIN_DIAMETER_MM
+    w, h = er.cell_w_mm, er.cell_h_mm
+    max_dim = max(w, h)
+    min_dim = min(w, h)
+    aspect = max_dim / min_dim if min_dim > 0 else float("inf")
+
+    checks: List[Tuple[str, bool, str]] = [
+        # ── ISO 11548-2 §6.3 — parâmetros do pino ────────────────────────────
+        (
+            "Espaçamento mínimo (>= 2,5 mm)",
+            sp >= 2.5,
+            f"{sp:.1f} mm",
+        ),
+        (
+            "Gap entre pinos (>= 1,0 mm)",
+            gap >= 1.0,
+            f"{gap:.1f} mm  [espaç. {sp:.1f} – ∅ {PIN_DIAMETER_MM:.1f}]",
+        ),
+        # ── Limiar de dois pontos — discriminação tátil ───────────────────────
+        (
+            "Razão espaç/diâm (>= 1,5×)",
+            sp / PIN_DIAMETER_MM >= 1.5,
+            f"{sp / PIN_DIAMETER_MM:.2f}×",
+        ),
+        # ── Tamanho de célula por modo ────────────────────────────────────────
+        (
+            "Cabe sob 1 dedo (ambos eixos <= 25 mm)"
+            if er.reading_mode == "1-dedo"
+            else "Eixo menor <= 25 mm (1 dedo varre 1 eixo)",
+            min_dim <= MAX_FINGER_AREA_MM,
+            f"menor eixo = {min_dim:.1f} mm",
+        ),
+        (
+            "Dimensão máxima dentro do alcance multi-dedo (<= 55 mm)"
+            if er.reading_mode == "multi-dedo"
+            else "Dimensão máxima dentro do alcance 1-dedo (<= 25 mm)",
+            max_dim <= (MAX_MULTI_FINGER_MM if er.reading_mode != "1-dedo"
+                        else MAX_FINGER_AREA_MM),
+            f"maior eixo = {max_dim:.1f} mm",
+        ),
+        # ── Proporção de aspecto — evita célula excessivamente alongada ───────
+        (
+            f"Relação de aspecto (<= {MAX_CELL_ASPECT_RATIO:.1f}×)",
+            aspect <= MAX_CELL_ASPECT_RATIO,
+            f"{aspect:.2f}×  [{w:.1f} × {h:.1f} mm]",
+        ),
+        # ── Capacidade sequencial ─────────────────────────────────────────────
+        (
+            f"Glifos/tira dentro da faixa ({SEQ_GLYPH_MIN}–{SEQ_GLYPH_MAX})",
+            SEQ_GLYPH_MIN <= er.seq_capacity <= SEQ_GLYPH_MAX + 2,
+            f"{er.seq_capacity} glifos/tira",
+        ),
+        # ── Cobertura psicofísica ─────────────────────────────────────────────
+        (
+            "Cobertura útil >= 95%",
+            er.report.coverage_pct >= 95.0,
+            f"{er.report.coverage_pct:.1f}%",
+        ),
+        (
+            "Cobertura útil >= 100%",
+            er.report.coverage_pct >= 100.0,
+            f"{er.report.coverage_pct:.1f}%",
+        ),
+    ]
+    return checks
+
+
+def _print_candidate_detail(
+    er: ExtendedReport,
+    label: str,
+    profiles: List[GlyphProfile],
+    offer_3d: bool = True,
+    viable: Optional[List[ExtendedReport]] = None,
+) -> None:
+    """Exibe ficha completa de um candidato com relatório de conformidade ISO."""
+    c, r = er.resolution
+    sep_inner = "  " + "-" * 64
+    print(f"\n  >>> {label}")
+    print(sep_inner)
+    print(f"      Resolução declarada : {c}×{r}  @  {er.spacing_mm:.1f} mm/pino")
+
+    # Resolução efetiva (cache já preenchido neste ponto)
+    eff_res, _ = _effective_resolution(profiles, er.resolution)
+    eff_w_mm = (eff_res[0] - 1) * er.spacing_mm
+    eff_h_mm = (eff_res[1] - 1) * er.spacing_mm
+    print(f"      Resolução efetiva   : {eff_res[0]}×{eff_res[1]} pinos  "
+          f"→  {eff_w_mm:.1f} × {eff_h_mm:.1f} mm")
+    print(f"      Área de célula      : {eff_w_mm * eff_h_mm:.1f} mm²")
+    print(f"      Modo tátil          : {er.reading_mode}")
+    print(f"      Glifos/tira         : até {er.seq_capacity}  "
+          f"(alvo: {SEQ_GLYPH_MIN}–{SEQ_GLYPH_MAX})")
+    print(f"      Cobertura útil      : {er.report.coverage_pct:.1f}%"
+          f"  ({er.report.apto} aptos / {er.report.total - er.report.blank} com visual)")
+
+    print(f"\n      Conformidade ISO 11548-2 / Psicofísica:")
+    checks = _iso_compliance(er)
+    all_pass = True
+    for name, ok, detail in checks:
+        icon = "✓" if ok else "✗"
+        print(f"        [{icon}] {name:<50s}  {detail}")
+        if not ok:
+            all_pass = False
+    verdict = "APROVADO — todos os critérios ISO satisfeitos" if all_pass \
+              else "ATENÇÃO  — um ou mais critérios não satisfeitos"
+    print(f"\n      Resultado: {verdict}")
+    print(sep_inner)
+
+    grid_path = _save_grid(er.report, profiles, er.spacing_mm)
+    print(f"      Grade visual : {grid_path.relative_to(pathlib.Path.cwd())}")
+
+    if offer_3d:
+        _prompt_tactile_3d(
+            {"resolution": list(er.resolution), "spacing_mm": er.spacing_mm},
+            profiles,
+            viable,
+        )
+
+
 def _generate_from_saved(
     candidates: List[dict],
     profiles: List[GlyphProfile],
@@ -921,12 +1055,41 @@ def _generate_from_saved(
     return True
 
 
-def _prompt_tactile_3d(candidate: dict, profiles: List[GlyphProfile]) -> None:
-    """Pergunta ao usuário se deseja gerar modelo 3D tátil e o produz."""
-    resp3d = input(
-        "\n  Deseja gerar modelo 3D tátil para impressão? [S/n]: "
-    ).strip().lower()
-    if resp3d not in ("", "s", "sim", "y", "yes"):
+def _prompt_tactile_3d(
+    candidate: dict,
+    profiles: List[GlyphProfile],
+    viable: Optional[List["ExtendedReport"]] = None,
+) -> None:
+    """Pergunta ao usuário se deseja gerar modelo 3D tátil e o produz.
+
+    Quando *viable* é fornecida o usuário pode digitar o número de qualquer
+    candidato da lista para gerar o modelo daquele item em vez do atual.
+    """
+    if viable:
+        prompt = (
+            f"\n  Deseja gerar modelo 3D tátil para impressão?\n"
+            f"  [S = este candidato  /  1-{len(viable)} = escolher da lista  /  N = não]: "
+        )
+    else:
+        prompt = "\n  Deseja gerar modelo 3D tátil para impressão? [S/n]: "
+
+    resp3d = input(prompt).strip().lower()
+
+    if resp3d in ("n", "nao", "não", "no"):
+        return
+
+    if viable and resp3d.isdigit():
+        idx = int(resp3d)
+        if 1 <= idx <= len(viable):
+            er = viable[idx - 1]
+            candidate = {"resolution": list(er.resolution), "spacing_mm": er.spacing_mm}
+            print(
+                f"  -> Candidato #{idx} selecionado: "
+                f"{er.resolution[0]}×{er.resolution[1]} @ {er.spacing_mm:.1f} mm/pino"
+            )
+        else:
+            print(f"  -> Número fora do intervalo (1–{len(viable)}). Usando candidato atual.")
+    elif resp3d not in ("", "s", "sim", "y", "yes"):
         return
 
     seq = input(
@@ -1143,30 +1306,42 @@ def main() -> None:
     saved_for_display = _load_candidates()   # relê para confirmar escrita
     _print_candidates_table(saved_for_display[:25])
 
-    # Melhor candidato para leitura sequencial máxima
+    # ── Melhor candidato para varrimento sequencial (maior capacidade) ────────
     best_seq = viable[0] if viable else None
+
+    # ── Melhor candidato econômico (menor área física c/ cobertura >= 95%) ───
+    best_economy = min(
+        (e for e in viable if e.report.coverage_pct >= MIN_COVERAGE_ECONOMY),
+        key=lambda e: (e.cell_w_mm * e.cell_h_mm, -e.report.coverage_pct, -e.spacing_mm),
+        default=None,
+    )
+
     if best_seq:
-        print(f"\n  >>> Melhor candidato para varrimento sequencial:")
-        c, r = best_seq.resolution
-        print(f"      Resolucao    : {c}x{r}  @  {best_seq.spacing_mm:.1f} mm/pino")
-        print(f"      Celula fisica: {best_seq.cell_w_mm:.1f} mm (L) x {best_seq.cell_h_mm:.1f} mm (A)")
-        print(f"      Modo tactil  : {best_seq.reading_mode}")
-        print(f"      Glifos/tira  : ate {best_seq.seq_capacity}  "
-              f"(alvo: {SEQ_GLYPH_MIN}–{SEQ_GLYPH_MAX})")
-        print(f"      Cobertura    : {best_seq.report.coverage_pct:.1f}%")
-        grid_path = _save_grid(best_seq.report, profiles, best_seq.spacing_mm)
-        print(f"      Grade visual : {grid_path.relative_to(pathlib.Path.cwd())}")
-        # Oferta de geração de modelo 3D
-        _prompt_tactile_3d(
-            {
-                "resolution": list(best_seq.resolution),
-                "spacing_mm": best_seq.spacing_mm,
-            },
+        _print_candidate_detail(
+            best_seq,
+            "Melhor candidato — varrimento sequencial (maior capacidade)",
             profiles,
+            offer_3d=True,
+            viable=viable,
         )
     else:
         print("\n  Nenhum candidato viavel encontrado com os criterios definidos.")
         print("  Considere reduzir SEQ_GLYPH_MIN ou a exigencia de cobertura minima.")
+
+    if best_economy is not None and best_economy is not best_seq:
+        _print_candidate_detail(
+            best_economy,
+            "Melhor candidato econômico — menor área física com cobertura >= "
+            f"{MIN_COVERAGE_ECONOMY:.0f}%",
+            profiles,
+            offer_3d=True,
+            viable=viable,
+        )
+    elif best_economy is not None and best_economy is best_seq:
+        print(
+            "\n  [info] O candidato econômico coincide com o melhor sequencial — "
+            "nenhum candidato adicional exibido."
+        )
 
     print(f"\n{sep}")
 
