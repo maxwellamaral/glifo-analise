@@ -166,6 +166,8 @@ class ResolutionReport:
     loss: int
     loss_chars: List[str] = field(default_factory=list)
     verdicts: List[TactileVerdict] = field(default_factory=list)
+    eff_resolution: Tuple[int, int] = (0, 0)          # pinos efetivos após corte
+    crop_box: Tuple[int, int, int, int] = (0, 0, 0, 0)  # (row0, row1, col0, col1)
 
     @property
     def coverage_pct(self) -> float:
@@ -189,6 +191,9 @@ class ExtendedReport:
 # ---------------------------------------------------------------------------
 # Fonte do sistema para legendas e rótulos nas imagens de diagnóstico
 # ---------------------------------------------------------------------------
+
+# Cache de resolução efetiva: keyed by (W, H) → ((W_eff, H_eff), (row0, row1, col0, col1))
+_EFF_RES_CACHE: Dict[Tuple[int, int], Tuple[Tuple[int, int], Tuple[int, int, int, int]]] = {}
 
 # Candidatos em ordem de preferência: Arial → Times → Liberation → DejaVu → FreeSans
 _SYSTEM_FONT_CANDIDATES: List[str] = [
@@ -223,6 +228,64 @@ def _system_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
             except Exception:
                 continue
     return ImageFont.load_default()
+
+
+# ---------------------------------------------------------------------------
+# Resolucao efetiva: elimina pinos mortos (linhas/colunas nunca ativadas)
+# ---------------------------------------------------------------------------
+
+def _effective_resolution(
+    profiles: List["GlyphProfile"],
+    resolution: Tuple[int, int],
+) -> Tuple[Tuple[int, int], Tuple[int, int, int, int]]:
+    """
+    Calcula a resolução efetiva eliminando linhas/colunas de pinos nunca ativados.
+
+    Renderiza todos os glifos não-brancos na resolucao declarada e faz a uniao
+    dos pixels ativos. A caixa delimitadora resultante define quais pinos são
+    realmente necessários.
+
+    Returns:
+        (W_eff, H_eff): dimensões efetivas em pinos (colunas × linhas ativas).
+        (row0, row1, col0, col1): índices de recorte no bitmap declarado.
+
+    Usa _EFF_RES_CACHE para evitar re-renderização nas 60 chamadas da análise
+    estendida.
+    """
+    if resolution in _EFF_RES_CACHE:
+        return _EFF_RES_CACHE[resolution]
+
+    W, H = resolution
+    font = ImageFont.truetype(str(FONT_PATH), H - 2)
+    bitmaps = [
+        _render_bitmap(p.char, font, resolution)
+        for p in profiles
+        if p.codepoint not in INTENTIONALLY_BLANK
+    ]
+
+    if not bitmaps:
+        result: Tuple[Tuple[int, int], Tuple[int, int, int, int]] = (
+            resolution, (0, H - 1, 0, W - 1)
+        )
+        _EFF_RES_CACHE[resolution] = result
+        return result
+
+    stack = np.stack(bitmaps)          # (N, H, W)
+    row_any = stack.any(axis=(0, 2))   # (H,) — linhas com pelo menos 1 pixel ativo
+    col_any = stack.any(axis=(0, 1))   # (W,) — colunas com pelo menos 1 pixel ativo
+
+    active_rows = np.where(row_any)[0]
+    active_cols = np.where(col_any)[0]
+
+    if len(active_rows) == 0 or len(active_cols) == 0:
+        result = (resolution, (0, H - 1, 0, W - 1))
+    else:
+        row0, row1 = int(active_rows[0]), int(active_rows[-1])
+        col0, col1 = int(active_cols[0]), int(active_cols[-1])
+        result = ((col1 - col0 + 1, row1 - row0 + 1), (row0, row1, col0, col1))
+
+    _EFF_RES_CACHE[resolution] = result
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -361,6 +424,13 @@ def _analyze_resolution(
 ) -> ResolutionReport:
     """Analisa toda a fonte para uma resolucao de matriz especifica."""
     phys_mm = _physical_cell_size(resolution)
+
+    # Resolução efetiva: elimina pinos mortos (linhas/colunas nunca ativadas)
+    eff_res, crop_box = _effective_resolution(profiles, resolution)
+    eff_w_mm = (eff_res[0] - 1) * PIN_SPACING_MM
+    eff_h_mm = (eff_res[1] - 1) * PIN_SPACING_MM
+    phys_mm = max(eff_w_mm, eff_h_mm)   # tamanho físico efetivo
+
     fits_finger = phys_mm <= MAX_FINGER_AREA_MM
 
     test_font = ImageFont.truetype(str(FONT_PATH), resolution[1] - 2)
@@ -379,6 +449,8 @@ def _analyze_resolution(
             continue
 
         bm  = _render_bitmap(p.char, test_font, resolution)
+        if crop_box != (0, 0, 0, 0):
+            bm = bm[crop_box[0]:crop_box[1] + 1, crop_box[2]:crop_box[3] + 1]
         d   = _pixel_density(bm)
         ec  = _edge_complexity(bm)
         iou = _iou(p.bitmap_ref, bm)
@@ -418,6 +490,7 @@ def _analyze_resolution(
         resolution=resolution, phys_size_mm=phys_mm, fits_finger=fits_finger,
         total=len(verdicts), apto=apto, blank=blank, loss=loss,
         loss_chars=loss_chars, verdicts=verdicts,
+        eff_resolution=eff_res, crop_box=crop_box,
     )
 
 
@@ -425,10 +498,17 @@ def _analyze_resolution(
 # Grade visual de diagnostico
 # ---------------------------------------------------------------------------
 
-def _save_grid(report: ResolutionReport, profiles: List[GlyphProfile]) -> pathlib.Path:
+def _save_grid(
+    report: ResolutionReport,
+    profiles: List[GlyphProfile],
+    spacing_mm: float = PIN_SPACING_MM,
+) -> pathlib.Path:
     """Grade visual com bordas coloridas por veredicto tatil."""
     res = report.resolution
-    w, h = res
+    # Usa dimensões efetivas (pós-corte de pinos mortos) se disponíveis
+    eff_res = report.eff_resolution if report.eff_resolution != (0, 0) else res
+    w, h = eff_res
+    crop_box = report.crop_box
     v_map = {v.char: v for v in report.verdicts}
 
     cols  = 20
@@ -443,7 +523,7 @@ def _save_grid(report: ResolutionReport, profiles: List[GlyphProfile]) -> pathli
     dc = ImageDraw.Draw(canvas)
 
     lbl = _system_font(9)   # Arial/Times para rótulos de codepoint e legenda
-    test_font = ImageFont.truetype(str(FONT_PATH), res[1] - 2)
+    test_font = ImageFont.truetype(str(FONT_PATH), res[1] - 2)  # fonte no tamanho declarado
 
     COLOR = {
         "APTO":             (60, 160, 60),
@@ -464,6 +544,8 @@ def _save_grid(report: ResolutionReport, profiles: List[GlyphProfile]) -> pathli
             bm = np.zeros((h, w), dtype=np.uint8)
         else:
             bm = _render_bitmap(p.char, test_font, res)
+            if crop_box != (0, 0, 0, 0):
+                bm = bm[crop_box[0]:crop_box[1] + 1, crop_box[2]:crop_box[3] + 1]
 
         gimg = Image.fromarray(((1 - bm) * 255).astype(np.uint8))
         gimg = gimg.resize((cw, ch_px), Image.NEAREST).convert("RGB")
@@ -483,7 +565,7 @@ def _save_grid(report: ResolutionReport, profiles: List[GlyphProfile]) -> pathli
         dc.text((lx + 12, ly), label, font=lbl, fill=(40, 40, 40))
         lx += 105
 
-    out = OUTPUT_DIR / f"tatil_{res[0]}x{res[1]}.png"
+    out = OUTPUT_DIR / f"tatil_{res[0]}x{res[1]}_{spacing_mm:.1f}mm.png"
     canvas.save(out)
     return out
 
@@ -532,6 +614,12 @@ def _analyze_resolution_ext(
         MAX_FINGER_AREA_MM (1 dedo).
     """
     cell_w_mm, cell_h_mm = _physical_cell_size_mn(resolution, spacing_mm)
+
+    # Resolução efetiva: elimina pinos mortos (linhas/colunas nunca ativadas)
+    eff_res, crop_box = _effective_resolution(profiles, resolution)
+    cell_w_mm = (eff_res[0] - 1) * spacing_mm   # tamanho físico efetivo horizontal
+    cell_h_mm = (eff_res[1] - 1) * spacing_mm   # tamanho físico efetivo vertical
+
     max_dim = max(cell_w_mm, cell_h_mm)
 
     if max_dim <= MAX_FINGER_AREA_MM:
@@ -562,6 +650,8 @@ def _analyze_resolution_ext(
             continue
 
         bm  = _render_bitmap(p.char, test_font, resolution)
+        if crop_box != (0, 0, 0, 0):
+            bm = bm[crop_box[0]:crop_box[1] + 1, crop_box[2]:crop_box[3] + 1]
         d   = _pixel_density(bm)
         ec  = _edge_complexity(bm)
         iou = _iou(p.bitmap_ref, bm)
@@ -601,6 +691,7 @@ def _analyze_resolution_ext(
         resolution=resolution, phys_size_mm=max_dim, fits_finger=fits,
         total=len(verdicts), apto=apto, blank=blank, loss=loss,
         loss_chars=loss_chars, verdicts=verdicts,
+        eff_resolution=eff_res, crop_box=crop_box,
     )
 
     seq_cap = _sequence_capacity(cell_w_mm)
@@ -705,7 +796,7 @@ def _generate_from_saved(
     print(f"\n  Gerando grade para {res[0]}x{res[1]} @ {sp:.1f} mm...")
     # Reanalisa apenas o candidato escolhido
     er = _analyze_resolution_ext(profiles, res, sp)  # type: ignore[arg-type]
-    grid_path = _save_grid(er.report, profiles)
+    grid_path = _save_grid(er.report, profiles, er.spacing_mm)
     print(f"  Grade salva em: {grid_path.relative_to(pathlib.Path.cwd())}")
     print(f"  Cobertura: {er.report.coverage_pct:.1f}%  |  "
           f"Modo: {er.reading_mode}  |  Seq: {er.seq_capacity} glifos/tira")
@@ -765,6 +856,11 @@ def main() -> None:
     print(sep)
     print("  ELIS -- Analise de Viabilidade Tatil para Dispositivo Matricial")
     print(sep)
+
+    # Limpa lista anterior antes de iniciar novo processamento completo
+    if CANDIDATES_FILE.exists():
+        CANDIDATES_FILE.unlink()
+        print(f"  [info] Lista anterior removida: {CANDIDATES_FILE.name}")
 
     # 1. Perfis
     print("\n[1/4] Carregando glifos e calculando perfis de referencia (64x64)...")
@@ -908,7 +1004,7 @@ def main() -> None:
         print(f"      Glifos/tira  : ate {best_seq.seq_capacity}  "
               f"(alvo: {SEQ_GLYPH_MIN}–{SEQ_GLYPH_MAX})")
         print(f"      Cobertura    : {best_seq.report.coverage_pct:.1f}%")
-        grid_path = _save_grid(best_seq.report, profiles)
+        grid_path = _save_grid(best_seq.report, profiles, best_seq.spacing_mm)
         print(f"      Grade visual : {grid_path.relative_to(pathlib.Path.cwd())}")
     else:
         print("\n  Nenhum candidato viavel encontrado com os criterios definidos.")

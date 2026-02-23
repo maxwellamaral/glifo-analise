@@ -2,13 +2,13 @@
   {
     "rank": 1,
     "resolution": [
-      10,
-      12
+      13,
+      13
     ],
     "spacing_mm": 2.5,
     "cell_w_mm": 22.5,
-    "cell_h_mm": 27.5,
-    "reading_mode": "multi-dedo",
+    "cell_h_mm": 22.5,
+    "reading_mode": "1-dedo",
     "seq_capacity": 7,
     "seq_in_range": true,
     "coverage_pct": 100.0
@@ -16,12 +16,12 @@
   {
     "rank": 2,
     "resolution": [
-      10,
-      12
+      13,
+      13
     ],
     "spacing_mm": 3.0,
     "cell_w_mm": 27.0,
-    "cell_h_mm": 33.0,
+    "cell_h_mm": 27.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 6,
     "seq_in_range": true,
@@ -30,13 +30,13 @@
   {
     "rank": 3,
     "resolution": [
-      12,
-      15
+      16,
+      13
     ],
     "spacing_mm": 2.5,
-    "cell_w_mm": 27.5,
-    "cell_h_mm": 35.0,
-    "reading_mode": "multi-dedo",
+    "cell_w_mm": 25.0,
+    "cell_h_mm": 22.5,
+    "reading_mode": "1-dedo",
     "seq_capacity": 6,
     "seq_in_range": true,
     "coverage_pct": 100.0
@@ -44,12 +44,12 @@
   {
     "rank": 4,
     "resolution": [
-      10,
-      12
+      13,
+      13
     ],
     "spacing_mm": 3.5,
     "cell_w_mm": 31.5,
-    "cell_h_mm": 38.5,
+    "cell_h_mm": 31.5,
     "reading_mode": "multi-dedo",
     "seq_capacity": 5,
     "seq_in_range": true,
@@ -58,12 +58,12 @@
   {
     "rank": 5,
     "resolution": [
-      12,
-      15
+      16,
+      13
     ],
     "spacing_mm": 3.0,
-    "cell_w_mm": 33.0,
-    "cell_h_mm": 42.0,
+    "cell_w_mm": 30.0,
+    "cell_h_mm": 27.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 5,
     "seq_in_range": true,
@@ -72,26 +72,26 @@
   {
     "rank": 6,
     "resolution": [
-      13,
+      16,
       13
     ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 30.0,
-    "cell_h_mm": 30.0,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 35.0,
+    "cell_h_mm": 31.5,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 5,
+    "seq_capacity": 4,
     "seq_in_range": true,
     "coverage_pct": 100.0
   },
   {
     "rank": 7,
     "resolution": [
-      13,
-      13
+      20,
+      20
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 42.0,
-    "cell_h_mm": 42.0,
+    "spacing_mm": 2.5,
+    "cell_w_mm": 40.0,
+    "cell_h_mm": 40.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 4,
     "seq_in_range": true,
@@ -100,72 +100,72 @@
   {
     "rank": 8,
     "resolution": [
-      12,
-      15
+      15,
+      10
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 38.5,
-    "cell_h_mm": 49.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 100.0
+    "coverage_pct": 99.23
   },
   {
     "rank": 9,
     "resolution": [
-      13,
-      13
+      15,
+      10
     ],
     "spacing_mm": 3.0,
-    "cell_w_mm": 36.0,
-    "cell_h_mm": 36.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 21.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
     "seq_in_range": true,
-    "coverage_pct": 100.0
+    "coverage_pct": 99.23
   },
   {
     "rank": 10,
     "resolution": [
-      8,
-      12
+      15,
+      10
     ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 17.5,
-    "cell_h_mm": 27.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 8,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 24.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 99.24
+    "coverage_pct": 99.23
   },
   {
     "rank": 11,
     "resolution": [
-      8,
-      12
+      15,
+      15
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 21.0,
-    "cell_h_mm": 33.0,
+    "spacing_mm": 2.5,
+    "cell_w_mm": 27.5,
+    "cell_h_mm": 27.5,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 7,
+    "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 99.24
+    "coverage_pct": 98.46
   },
   {
     "rank": 12,
     "resolution": [
-      8,
-      12
+      15,
+      15
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 24.5,
-    "cell_h_mm": 38.5,
+    "spacing_mm": 3.0,
+    "cell_w_mm": 33.0,
+    "cell_h_mm": 33.0,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
+    "seq_capacity": 5,
     "seq_in_range": true,
-    "coverage_pct": 99.24
+    "coverage_pct": 98.46
   },
   {
     "rank": 13,
@@ -175,25 +175,25 @@
     ],
     "spacing_mm": 2.5,
     "cell_w_mm": 30.0,
-    "cell_h_mm": 37.5,
+    "cell_h_mm": 32.5,
     "reading_mode": "multi-dedo",
     "seq_capacity": 5,
     "seq_in_range": true,
-    "coverage_pct": 99.23
+    "coverage_pct": 98.46
   },
   {
     "rank": 14,
     "resolution": [
-      13,
-      16
+      15,
+      15
     ],
     "spacing_mm": 3.5,
-    "cell_w_mm": 42.0,
-    "cell_h_mm": 52.5,
+    "cell_w_mm": 38.5,
+    "cell_h_mm": 38.5,
     "reading_mode": "multi-dedo",
     "seq_capacity": 4,
     "seq_in_range": true,
-    "coverage_pct": 99.23
+    "coverage_pct": 98.46
   },
   {
     "rank": 15,
@@ -201,89 +201,89 @@
       13,
       16
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 36.0,
-    "cell_h_mm": 45.0,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 42.0,
+    "cell_h_mm": 45.5,
     "reading_mode": "multi-dedo",
     "seq_capacity": 4,
     "seq_in_range": true,
-    "coverage_pct": 99.23
+    "coverage_pct": 98.46
   },
   {
     "rank": 16,
     "resolution": [
-      15,
-      15
+      13,
+      16
     ],
     "spacing_mm": 3.0,
-    "cell_w_mm": 42.0,
-    "cell_h_mm": 42.0,
+    "cell_w_mm": 36.0,
+    "cell_h_mm": 39.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 4,
     "seq_in_range": true,
-    "coverage_pct": 99.21
+    "coverage_pct": 98.46
   },
   {
     "rank": 17,
     "resolution": [
       15,
-      15
+      12
     ],
     "spacing_mm": 2.5,
-    "cell_w_mm": 35.0,
-    "cell_h_mm": 35.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
+    "cell_w_mm": 20.0,
+    "cell_h_mm": 25.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
     "seq_in_range": true,
-    "coverage_pct": 99.21
+    "coverage_pct": 97.71
   },
   {
     "rank": 18,
     "resolution": [
-      8,
-      16
+      15,
+      12
     ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 17.5,
-    "cell_h_mm": 37.5,
+    "spacing_mm": 3.0,
+    "cell_w_mm": 24.0,
+    "cell_h_mm": 30.0,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 8,
+    "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 98.52
+    "coverage_pct": 97.71
   },
   {
     "rank": 19,
     "resolution": [
-      8,
-      16
+      15,
+      12
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 21.0,
-    "cell_h_mm": 45.0,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 28.0,
+    "cell_h_mm": 35.0,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 7,
+    "seq_capacity": 5,
     "seq_in_range": true,
-    "coverage_pct": 98.52
+    "coverage_pct": 97.71
   },
   {
     "rank": 20,
     "resolution": [
-      8,
-      16
+      10,
+      10
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 24.5,
-    "cell_h_mm": 52.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 98.52
+    "coverage_pct": 97.69
   },
   {
     "rank": 21,
     "resolution": [
       8,
-      8
+      10
     ],
     "spacing_mm": 2.5,
     "cell_w_mm": 17.5,
@@ -291,13 +291,27 @@
     "reading_mode": "1-dedo",
     "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 98.4
+    "coverage_pct": 97.69
   },
   {
     "rank": 22,
     "resolution": [
-      8,
-      8
+      12,
+      10
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 23,
+    "resolution": [
+      10,
+      10
     ],
     "spacing_mm": 3.0,
     "cell_w_mm": 21.0,
@@ -305,13 +319,41 @@
     "reading_mode": "1-dedo",
     "seq_capacity": 7,
     "seq_in_range": true,
-    "coverage_pct": 98.4
+    "coverage_pct": 97.69
   },
   {
-    "rank": 23,
+    "rank": 24,
     "resolution": [
       8,
-      8
+      10
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 21.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 25,
+    "resolution": [
+      12,
+      10
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 21.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 26,
+    "resolution": [
+      10,
+      10
     ],
     "spacing_mm": 3.5,
     "cell_w_mm": 24.5,
@@ -319,370 +361,496 @@
     "reading_mode": "1-dedo",
     "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 98.4
-  },
-  {
-    "rank": 24,
-    "resolution": [
-      15,
-      12
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 42.0,
-    "cell_h_mm": 33.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
-    "seq_in_range": true,
-    "coverage_pct": 98.39
-  },
-  {
-    "rank": 25,
-    "resolution": [
-      15,
-      12
-    ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 35.0,
-    "cell_h_mm": 27.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
-    "seq_in_range": true,
-    "coverage_pct": 98.39
-  },
-  {
-    "rank": 26,
-    "resolution": [
-      16,
-      13
-    ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 37.5,
-    "cell_h_mm": 30.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
-    "seq_in_range": true,
-    "coverage_pct": 98.35
+    "coverage_pct": 97.69
   },
   {
     "rank": 27,
     "resolution": [
-      10,
-      8
+      8,
+      10
     ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 22.5,
-    "cell_h_mm": 17.5,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 24.5,
     "reading_mode": "1-dedo",
-    "seq_capacity": 7,
+    "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 98.29
+    "coverage_pct": 97.69
   },
   {
     "rank": 28,
     "resolution": [
-      10,
-      8
+      12,
+      10
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 27.0,
-    "cell_h_mm": 21.0,
-    "reading_mode": "multi-dedo",
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 24.5,
+    "reading_mode": "1-dedo",
     "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 98.29
+    "coverage_pct": 97.69
   },
   {
     "rank": 29,
     "resolution": [
-      10,
-      8
+      12,
+      15
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 31.5,
-    "cell_h_mm": 24.5,
+    "spacing_mm": 2.5,
+    "cell_w_mm": 27.5,
+    "cell_h_mm": 27.5,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 5,
+    "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 98.29
+    "coverage_pct": 97.69
   },
   {
     "rank": 30,
     "resolution": [
-      8,
+      12,
       15
     ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 17.5,
-    "cell_h_mm": 35.0,
+    "spacing_mm": 3.0,
+    "cell_w_mm": 33.0,
+    "cell_h_mm": 33.0,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 8,
+    "seq_capacity": 5,
     "seq_in_range": true,
     "coverage_pct": 97.69
   },
   {
     "rank": 31,
     "resolution": [
-      8,
+      12,
       15
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 21.0,
-    "cell_h_mm": 42.0,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 38.5,
+    "cell_h_mm": 38.5,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 7,
+    "seq_capacity": 4,
     "seq_in_range": true,
     "coverage_pct": 97.69
   },
   {
     "rank": 32,
     "resolution": [
-      10,
-      15
+      8,
+      12
     ],
     "spacing_mm": 2.5,
-    "cell_w_mm": 22.5,
-    "cell_h_mm": 35.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 7,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 25.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 97.69
+    "coverage_pct": 96.18
   },
   {
     "rank": 33,
     "resolution": [
       8,
-      15
+      12
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 24.5,
-    "cell_h_mm": 49.0,
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 30.0,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
+    "seq_capacity": 7,
     "seq_in_range": true,
-    "coverage_pct": 97.69
+    "coverage_pct": 96.18
   },
   {
     "rank": 34,
     "resolution": [
-      10,
-      15
+      8,
+      12
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 27.0,
-    "cell_h_mm": 42.0,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 35.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 6,
     "seq_in_range": true,
-    "coverage_pct": 97.69
+    "coverage_pct": 96.18
   },
   {
     "rank": 35,
     "resolution": [
+      15,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 12.5,
+    "cell_h_mm": 12.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 11,
+    "seq_in_range": true,
+    "coverage_pct": 96.0
+  },
+  {
+    "rank": 36,
+    "resolution": [
+      15,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 15.0,
+    "cell_h_mm": 15.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 10,
+    "seq_in_range": true,
+    "coverage_pct": 96.0
+  },
+  {
+    "rank": 37,
+    "resolution": [
+      15,
+      8
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 96.0
+  },
+  {
+    "rank": 38,
+    "resolution": [
+      8,
+      16
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 32.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 95.56
+  },
+  {
+    "rank": 39,
+    "resolution": [
+      8,
+      16
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 39.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 95.56
+  },
+  {
+    "rank": 40,
+    "resolution": [
+      8,
+      16
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 45.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 95.56
+  },
+  {
+    "rank": 41,
+    "resolution": [
+      10,
+      15
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 22.5,
+    "cell_h_mm": 27.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 95.38
+  },
+  {
+    "rank": 42,
+    "resolution": [
+      10,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 27.0,
+    "cell_h_mm": 33.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 95.38
+  },
+  {
+    "rank": 43,
+    "resolution": [
       10,
       15
     ],
     "spacing_mm": 3.5,
     "cell_w_mm": 31.5,
-    "cell_h_mm": 49.0,
+    "cell_h_mm": 38.5,
     "reading_mode": "multi-dedo",
     "seq_capacity": 5,
     "seq_in_range": true,
-    "coverage_pct": 97.69
-  },
-  {
-    "rank": 36,
-    "resolution": [
-      10,
-      10
-    ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 22.5,
-    "cell_h_mm": 22.5,
-    "reading_mode": "1-dedo",
-    "seq_capacity": 7,
-    "seq_in_range": true,
-    "coverage_pct": 97.62
-  },
-  {
-    "rank": 37,
-    "resolution": [
-      10,
-      10
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 27.0,
-    "cell_h_mm": 27.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
-    "seq_in_range": true,
-    "coverage_pct": 97.62
-  },
-  {
-    "rank": 38,
-    "resolution": [
-      10,
-      10
-    ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 31.5,
-    "cell_h_mm": 31.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 5,
-    "seq_in_range": true,
-    "coverage_pct": 97.62
-  },
-  {
-    "rank": 39,
-    "resolution": [
-      12,
-      10
-    ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 27.5,
-    "cell_h_mm": 22.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
-    "seq_in_range": true,
-    "coverage_pct": 96.67
-  },
-  {
-    "rank": 40,
-    "resolution": [
-      12,
-      10
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 33.0,
-    "cell_h_mm": 27.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 5,
-    "seq_in_range": true,
-    "coverage_pct": 96.67
-  },
-  {
-    "rank": 41,
-    "resolution": [
-      12,
-      10
-    ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 38.5,
-    "cell_h_mm": 31.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
-    "seq_in_range": true,
-    "coverage_pct": 96.67
-  },
-  {
-    "rank": 42,
-    "resolution": [
-      8,
-      10
-    ],
-    "spacing_mm": 2.5,
-    "cell_w_mm": 17.5,
-    "cell_h_mm": 22.5,
-    "reading_mode": "1-dedo",
-    "seq_capacity": 8,
-    "seq_in_range": true,
-    "coverage_pct": 96.03
-  },
-  {
-    "rank": 43,
-    "resolution": [
-      8,
-      10
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 21.0,
-    "cell_h_mm": 27.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 7,
-    "seq_in_range": true,
-    "coverage_pct": 96.03
+    "coverage_pct": 95.38
   },
   {
     "rank": 44,
     "resolution": [
       8,
-      10
+      15
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 24.5,
-    "cell_h_mm": 31.5,
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 27.5,
     "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
+    "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 96.03
+    "coverage_pct": 94.89
   },
   {
     "rank": 45,
     "resolution": [
+      8,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 33.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 94.89
+  },
+  {
+    "rank": 46,
+    "resolution": [
+      8,
+      15
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 38.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 94.89
+  },
+  {
+    "rank": 47,
+    "resolution": [
+      8,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 12.5,
+    "cell_h_mm": 12.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 11,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 48,
+    "resolution": [
+      10,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 12.5,
+    "cell_h_mm": 12.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 11,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 49,
+    "resolution": [
       12,
       8
     ],
     "spacing_mm": 2.5,
-    "cell_w_mm": 27.5,
-    "cell_h_mm": 17.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
+    "cell_w_mm": 12.5,
+    "cell_h_mm": 12.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 11,
     "seq_in_range": true,
-    "coverage_pct": 94.02
+    "coverage_pct": 94.4
   },
   {
-    "rank": 46,
+    "rank": 50,
+    "resolution": [
+      16,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 12.5,
+    "cell_h_mm": 12.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 11,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 51,
+    "resolution": [
+      8,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 15.0,
+    "cell_h_mm": 15.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 10,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 52,
+    "resolution": [
+      10,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 15.0,
+    "cell_h_mm": 15.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 10,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 53,
     "resolution": [
       12,
       8
     ],
     "spacing_mm": 3.0,
-    "cell_w_mm": 33.0,
-    "cell_h_mm": 21.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 5,
+    "cell_w_mm": 15.0,
+    "cell_h_mm": 15.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 10,
     "seq_in_range": true,
-    "coverage_pct": 94.02
+    "coverage_pct": 94.4
   },
   {
-    "rank": 47,
+    "rank": 54,
+    "resolution": [
+      16,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 15.0,
+    "cell_h_mm": 15.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 10,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 55,
+    "resolution": [
+      8,
+      8
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 56,
+    "resolution": [
+      10,
+      8
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 94.4
+  },
+  {
+    "rank": 57,
     "resolution": [
       12,
       8
     ],
     "spacing_mm": 3.5,
-    "cell_w_mm": 38.5,
-    "cell_h_mm": 24.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 94.02
+    "coverage_pct": 94.4
   },
   {
-    "rank": 48,
+    "rank": 58,
     "resolution": [
-      15,
-      10
+      16,
+      8
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 42.0,
-    "cell_h_mm": 27.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
     "seq_in_range": true,
-    "coverage_pct": 89.66
+    "coverage_pct": 94.4
   },
   {
-    "rank": 49,
+    "rank": 59,
     "resolution": [
-      15,
-      10
+      10,
+      12
     ],
     "spacing_mm": 2.5,
-    "cell_w_mm": 35.0,
-    "cell_h_mm": 22.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
+    "cell_w_mm": 20.0,
+    "cell_h_mm": 25.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
     "seq_in_range": true,
-    "coverage_pct": 89.66
+    "coverage_pct": 88.55
+  },
+  {
+    "rank": 60,
+    "resolution": [
+      10,
+      12
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 24.0,
+    "cell_h_mm": 30.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 88.55
+  },
+  {
+    "rank": 61,
+    "resolution": [
+      10,
+      12
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 28.0,
+    "cell_h_mm": 35.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 88.55
   }
 ]
