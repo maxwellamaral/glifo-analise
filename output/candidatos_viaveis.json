@@ -16,20 +16,6 @@
   {
     "rank": 2,
     "resolution": [
-      13,
-      13
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 27.0,
-    "cell_h_mm": 27.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 6,
-    "seq_in_range": true,
-    "coverage_pct": 100.0
-  },
-  {
-    "rank": 3,
-    "resolution": [
       16,
       13
     ],
@@ -42,14 +28,28 @@
     "coverage_pct": 100.0
   },
   {
-    "rank": 4,
+    "rank": 3,
     "resolution": [
       13,
       13
     ],
-    "spacing_mm": 3.5,
-    "cell_w_mm": 31.5,
-    "cell_h_mm": 31.5,
+    "spacing_mm": 3.0,
+    "cell_w_mm": 27.0,
+    "cell_h_mm": 27.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 4,
+    "resolution": [
+      16,
+      13
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 30.0,
+    "cell_h_mm": 27.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 5,
     "seq_in_range": true,
@@ -58,12 +58,12 @@
   {
     "rank": 5,
     "resolution": [
-      16,
+      13,
       13
     ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 30.0,
-    "cell_h_mm": 27.0,
+    "spacing_mm": 3.5,
+    "cell_w_mm": 31.5,
+    "cell_h_mm": 31.5,
     "reading_mode": "multi-dedo",
     "seq_capacity": 5,
     "seq_in_range": true,
@@ -156,20 +156,6 @@
   {
     "rank": 12,
     "resolution": [
-      15,
-      15
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 33.0,
-    "cell_h_mm": 33.0,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 5,
-    "seq_in_range": true,
-    "coverage_pct": 98.46
-  },
-  {
-    "rank": 13,
-    "resolution": [
       13,
       16
     ],
@@ -182,7 +168,35 @@
     "coverage_pct": 98.46
   },
   {
+    "rank": 13,
+    "resolution": [
+      15,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 33.0,
+    "cell_h_mm": 33.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 98.46
+  },
+  {
     "rank": 14,
+    "resolution": [
+      13,
+      16
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 36.0,
+    "cell_h_mm": 39.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 98.46
+  },
+  {
+    "rank": 15,
     "resolution": [
       15,
       15
@@ -196,7 +210,7 @@
     "coverage_pct": 98.46
   },
   {
-    "rank": 15,
+    "rank": 16,
     "resolution": [
       13,
       16
@@ -204,20 +218,6 @@
     "spacing_mm": 3.5,
     "cell_w_mm": 42.0,
     "cell_h_mm": 45.5,
-    "reading_mode": "multi-dedo",
-    "seq_capacity": 4,
-    "seq_in_range": true,
-    "coverage_pct": 98.46
-  },
-  {
-    "rank": 16,
-    "resolution": [
-      13,
-      16
-    ],
-    "spacing_mm": 3.0,
-    "cell_w_mm": 36.0,
-    "cell_h_mm": 39.0,
     "reading_mode": "multi-dedo",
     "seq_capacity": 4,
     "seq_in_range": true,
