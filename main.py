@@ -571,6 +571,119 @@ def _save_grid(
 
 
 # ---------------------------------------------------------------------------
+# Geração de modelo 3D tátil (STL / 3MF) para impressão de protótipo
+# ---------------------------------------------------------------------------
+
+DEFAULT_TACTILE_SEQUENCE = "tqlDà"
+
+def _generate_tactile_3d(
+    sequence: str,
+    candidate: dict,
+    profiles: List[GlyphProfile],
+    fmt: str = "3mf",
+    pin_height_mm: float = 0.6,
+    base_thickness_mm: float = 2.0,
+    margin_mm: float = 1.5,
+) -> pathlib.Path:
+    """
+    Gera modelo 3D de tira tátil com os glifos da sequência fornecida.
+
+    Geometria:
+      - Placa base retangular (base_thickness_mm de espessura).
+      - Para cada pixel ativo no bitmap recortado: cilindro de diâmetro
+        PIN_DIAMETER_MM e altura pin_height_mm rasando a face superior da base.
+      - Células dispostas lado a lado com GAP_BETWEEN_CELLS_MM de separação.
+      - Margem (margin_mm) em torno do conjunto de células.
+
+    Args:
+        sequence: String com os caracteres ELIS a renderizar.
+        candidate: Candidato da lista (dict com 'resolution' e 'spacing_mm').
+        profiles: Perfis dos glifos (necessários para _effective_resolution).
+        fmt: Formato de saída — 'stl' ou '3mf'.
+        pin_height_mm: Altura dos pinos acima da base (padrão: 0.6 mm).
+        base_thickness_mm: Espessura da placa-base (padrão: 2.0 mm).
+        margin_mm: Margem lateral ao redor da tira (padrão: 1.5 mm).
+
+    Returns:
+        Caminho do arquivo gerado.
+    """
+    try:
+        import trimesh  # type: ignore[import]
+    except ImportError as exc:
+        raise RuntimeError(
+            "trimesh não encontrado. Execute: uv add trimesh"
+        ) from exc
+
+    cols, rows = tuple(candidate["resolution"])
+    spacing_mm: float = candidate["spacing_mm"]
+    resolution: Tuple[int, int] = (cols, rows)
+
+    # Resolução efetiva (elimina pinos mortos) — usa cache se já calculado
+    eff_res, crop_box = _effective_resolution(profiles, resolution)
+    eff_cols, eff_rows = eff_res
+
+    cell_w_mm = (eff_cols - 1) * spacing_mm
+    cell_h_mm = (eff_rows - 1) * spacing_mm
+
+    # Renderiza cada glifo da sequência
+    font = ImageFont.truetype(str(FONT_PATH), rows - 2)
+    bitmaps: List[np.ndarray] = []
+    for ch in sequence:
+        cp = ord(ch)
+        if cp in INTENTIONALLY_BLANK:
+            bitmaps.append(np.zeros((eff_rows, eff_cols), dtype=np.uint8))
+        else:
+            bm = _render_bitmap(ch, font, resolution)
+            if crop_box != (0, 0, 0, 0):
+                bm = bm[crop_box[0]:crop_box[1] + 1, crop_box[2]:crop_box[3] + 1]
+            bitmaps.append(bm)
+
+    n = len(bitmaps)
+    total_w = n * cell_w_mm + max(0, n - 1) * GAP_BETWEEN_CELLS_MM
+    total_h = cell_h_mm
+    plate_w = total_w + 2 * margin_mm
+    plate_h = total_h + 2 * margin_mm
+
+    meshes: List[object] = []
+
+    # Placa-base: box centrado em (plate_w/2, plate_h/2, base_thickness/2)
+    base = trimesh.creation.box([plate_w, plate_h, base_thickness_mm])
+    base.apply_translation([plate_w / 2, plate_h / 2, base_thickness_mm / 2])
+    meshes.append(base)
+
+    # Pinos
+    pin_r = PIN_DIAMETER_MM / 2
+    for g_idx, bm in enumerate(bitmaps):
+        x_off = margin_mm + g_idx * (cell_w_mm + GAP_BETWEEN_CELLS_MM)
+        for r_idx in range(eff_rows):
+            for c_idx in range(eff_cols):
+                if not bm[r_idx, c_idx]:
+                    continue
+                cx = x_off + c_idx * spacing_mm
+                # Inverte verticalmente: linha 0 do bitmap → topo físico (Y máximo)
+                cy = margin_mm + (eff_rows - 1 - r_idx) * spacing_mm
+                cz = base_thickness_mm + pin_height_mm / 2
+                pin = trimesh.creation.cylinder(
+                    radius=pin_r,
+                    height=pin_height_mm,
+                    sections=16,
+                )
+                pin.apply_translation([cx, cy, cz])
+                meshes.append(pin)
+
+    combined = trimesh.util.concatenate(meshes)
+
+    # Nome do arquivo: caracteres não alfanuméricos → U+XXXX
+    seq_safe = "".join(
+        c if c.isalnum() else f"U{ord(c):04X}" for c in sequence
+    )
+    fname = f"tatil_3d_{cols}x{rows}_{spacing_mm:.1f}mm_{seq_safe}.{fmt}"
+    out = OUTPUT_DIR / fname
+    combined.export(str(out))
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Funcoes de suporte a analise estendida (multi-dedo / sequencial / M×N)
 # ---------------------------------------------------------------------------
 
@@ -800,8 +913,45 @@ def _generate_from_saved(
     print(f"  Grade salva em: {grid_path.relative_to(pathlib.Path.cwd())}")
     print(f"  Cobertura: {er.report.coverage_pct:.1f}%  |  "
           f"Modo: {er.reading_mode}  |  Seq: {er.seq_capacity} glifos/tira")
+
+    # Oferta de geração de modelo 3D para impressão
+    _prompt_tactile_3d(chosen, profiles)
+
     print(sep)
     return True
+
+
+def _prompt_tactile_3d(candidate: dict, profiles: List[GlyphProfile]) -> None:
+    """Pergunta ao usuário se deseja gerar modelo 3D tátil e o produz."""
+    resp3d = input(
+        "\n  Deseja gerar modelo 3D tátil para impressão? [S/n]: "
+    ).strip().lower()
+    if resp3d not in ("", "s", "sim", "y", "yes"):
+        return
+
+    seq = input(
+        f"  Sequência de glifos ELIS [{DEFAULT_TACTILE_SEQUENCE}]: "
+    ).strip()
+    if not seq:
+        seq = DEFAULT_TACTILE_SEQUENCE
+
+    fmt_resp = input("  Formato [3mf/stl, padrão 3mf]: ").strip().lower()
+    fmt = "stl" if fmt_resp == "stl" else "3mf"
+
+    print(f"  Gerando modelo 3D ({fmt.upper()}) para sequência: {seq!r} ...")
+    try:
+        out = _generate_tactile_3d(seq, candidate, profiles, fmt=fmt)
+        print(f"  Modelo salvo em: {out.relative_to(pathlib.Path.cwd())}")
+        cols, rows = candidate["resolution"]
+        sp = candidate["spacing_mm"]
+        eff_res, _ = _effective_resolution(profiles, (cols, rows))
+        print(
+            f"  Dimensões físicas por célula: "
+            f"{(eff_res[0]-1)*sp:.1f} mm (L) × {(eff_res[1]-1)*sp:.1f} mm (A)  "
+            f"+ base 2.0 mm de espessura"
+        )
+    except Exception as exc:
+        print(f"  [ERRO] Não foi possível gerar o modelo 3D: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -1006,6 +1156,14 @@ def main() -> None:
         print(f"      Cobertura    : {best_seq.report.coverage_pct:.1f}%")
         grid_path = _save_grid(best_seq.report, profiles, best_seq.spacing_mm)
         print(f"      Grade visual : {grid_path.relative_to(pathlib.Path.cwd())}")
+        # Oferta de geração de modelo 3D
+        _prompt_tactile_3d(
+            {
+                "resolution": list(best_seq.resolution),
+                "spacing_mm": best_seq.spacing_mm,
+            },
+            profiles,
+        )
     else:
         print("\n  Nenhum candidato viavel encontrado com os criterios definidos.")
         print("  Considere reduzir SEQ_GLYPH_MIN ou a exigencia de cobertura minima.")
