@@ -30,6 +30,8 @@ from glifo_analise.output.preview import (
     _generate_tactile_preview_png_full,
 )
 
+from glifo_analise.analysis.resolution import _analyze_resolution_ext
+
 router = APIRouter(prefix="/api/visualization", tags=["visualization"])
 
 
@@ -100,11 +102,6 @@ def _gen_cells(request: VisGenRequest) -> Dict[str, Any]:
 
 def _gen_grid(request: VisGenRequest, state: AppState) -> Dict[str, Any]:
     """Gera grade visual PNG de diagnóstico."""
-    if not state.extended_reports:
-        raise HTTPException(
-            status_code=400, detail="Nenhuma análise disponível. Execute /api/analysis/run primeiro."
-        )
-
     profiles = state.profiles
     if not profiles:
         codepoints = _collect_mapped_codepoints(config.FONT_PATH)
@@ -113,14 +110,20 @@ def _gen_grid(request: VisGenRequest, state: AppState) -> Dict[str, Any]:
     spacing_mm: float = request.candidate["spacing_mm"]
     cols, rows = tuple(request.candidate["resolution"])
 
-    matching = [
-        er for er in state.extended_reports
-        if er.resolution[0] == cols and er.resolution[1] == rows and er.spacing_mm == spacing_mm
-    ]
-    if not matching:
-        raise HTTPException(status_code=404, detail="Candidato não encontrado nos relatórios.")
+    # Tenta usar o relatório já calculado em memória
+    er = None
+    if state.extended_reports:
+        matching = [
+            r for r in state.extended_reports
+            if r.resolution[0] == cols and r.resolution[1] == rows and r.spacing_mm == spacing_mm
+        ]
+        if matching:
+            er = matching[0]
 
-    er = matching[0]
+    # Se não há relatório em memória, reanalisamos só este candidato
+    if er is None:
+        er = _analyze_resolution_ext(cols, rows, spacing_mm, profiles)
+
     out_path = _save_grid(
         report=er.report,
         profiles=profiles,
@@ -148,10 +151,5 @@ async def generate_visualization(
     elif request.type == "cells":
         return await loop.run_in_executor(None, _gen_cells, request)
     else:  # "grid"
-        if not state.extended_reports:
-            raise HTTPException(
-                status_code=400,
-                detail="Nenhuma análise disponível. Execute /api/analysis/run primeiro.",
-            )
         return await loop.run_in_executor(None, _gen_grid, request, state)
 
