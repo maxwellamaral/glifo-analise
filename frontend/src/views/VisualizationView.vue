@@ -8,7 +8,7 @@
 
     <template v-else>
       <div class="card mt-1 controls">
-        <label>Sequência: <input v-model="sequence" class="inp" /></label>
+        <label>Sequência: <input v-model="sequence" class="inp inp-elis" /></label>
         <label>Tipo:
           <select v-model="visType" class="inp">
             <option value="strip">Tira completa</option>
@@ -74,6 +74,13 @@ async function generate() {
 </script>
 
 <style scoped>
+@font-face {
+  font-family: 'ELIS';
+  src: url('/static/elis.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .view { max-width: 900px; }
 h2 { margin: 0 0 .5rem; }
 .mt-1 { margin-top: 1rem; }
@@ -89,6 +96,7 @@ h2 { margin: 0 0 .5rem; }
 .controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
 .controls label { display: flex; align-items: center; gap: .4rem; font-size: .9rem; }
 .inp { background: var(--bg); color: var(--text); border: 1px solid var(--accent); border-radius: 4px; padding: .25rem .5rem; }
+.inp-elis { font-family: 'ELIS', monospace; font-size: 1.15rem; letter-spacing: .05em; min-width: 12ch; }
 .btn-primary { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: .4rem 1rem; cursor: pointer; }
 .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 
