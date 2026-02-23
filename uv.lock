@@ -582,7 +582,7 @@ wheels = [
 [[package]]
 name = "glifo-analise"
 version = "0.2.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "fonttools" },
     { name = "lxml" },

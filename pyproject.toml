@@ -14,9 +14,14 @@ dependencies = [
     "trimesh>=4.11.2",
 ]
 
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project.scripts]
 glifo-analise = "glifo_analise.cli.main:main"
 glifo-gui     = "glifo_analise.gui.app:run"
+glifo-test    = "_pytest.config:console_main"
 
 [dependency-groups]
 dev = [
@@ -26,7 +31,10 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts   = "-v --tb=short"
+addopts   = "-v --tb=short --cov=glifo_analise --cov-report=term-missing"
+
+[tool.uv]
+package = true
 
 [tool.setuptools.packages.find]
 include = ["glifo_analise*"]
