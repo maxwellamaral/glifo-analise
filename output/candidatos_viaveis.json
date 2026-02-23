@@ -1,0 +1,688 @@
+[
+  {
+    "rank": 1,
+    "resolution": [
+      10,
+      12
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 22.5,
+    "cell_h_mm": 27.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 2,
+    "resolution": [
+      10,
+      12
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 27.0,
+    "cell_h_mm": 33.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 3,
+    "resolution": [
+      12,
+      15
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 27.5,
+    "cell_h_mm": 35.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 4,
+    "resolution": [
+      10,
+      12
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 31.5,
+    "cell_h_mm": 38.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 5,
+    "resolution": [
+      12,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 33.0,
+    "cell_h_mm": 42.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 6,
+    "resolution": [
+      13,
+      13
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 30.0,
+    "cell_h_mm": 30.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 7,
+    "resolution": [
+      13,
+      13
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 42.0,
+    "cell_h_mm": 42.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 8,
+    "resolution": [
+      12,
+      15
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 38.5,
+    "cell_h_mm": 49.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 9,
+    "resolution": [
+      13,
+      13
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 36.0,
+    "cell_h_mm": 36.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 100.0
+  },
+  {
+    "rank": 10,
+    "resolution": [
+      8,
+      12
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 27.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 99.24
+  },
+  {
+    "rank": 11,
+    "resolution": [
+      8,
+      12
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 33.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 99.24
+  },
+  {
+    "rank": 12,
+    "resolution": [
+      8,
+      12
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 38.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 99.24
+  },
+  {
+    "rank": 13,
+    "resolution": [
+      13,
+      16
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 30.0,
+    "cell_h_mm": 37.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 99.23
+  },
+  {
+    "rank": 14,
+    "resolution": [
+      13,
+      16
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 42.0,
+    "cell_h_mm": 52.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 99.23
+  },
+  {
+    "rank": 15,
+    "resolution": [
+      13,
+      16
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 36.0,
+    "cell_h_mm": 45.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 99.23
+  },
+  {
+    "rank": 16,
+    "resolution": [
+      15,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 42.0,
+    "cell_h_mm": 42.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 99.21
+  },
+  {
+    "rank": 17,
+    "resolution": [
+      15,
+      15
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 35.0,
+    "cell_h_mm": 35.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 99.21
+  },
+  {
+    "rank": 18,
+    "resolution": [
+      8,
+      16
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 37.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 98.52
+  },
+  {
+    "rank": 19,
+    "resolution": [
+      8,
+      16
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 45.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 98.52
+  },
+  {
+    "rank": 20,
+    "resolution": [
+      8,
+      16
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 52.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 98.52
+  },
+  {
+    "rank": 21,
+    "resolution": [
+      8,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 98.4
+  },
+  {
+    "rank": 22,
+    "resolution": [
+      8,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 21.0,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 98.4
+  },
+  {
+    "rank": 23,
+    "resolution": [
+      8,
+      8
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 24.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 98.4
+  },
+  {
+    "rank": 24,
+    "resolution": [
+      15,
+      12
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 42.0,
+    "cell_h_mm": 33.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 98.39
+  },
+  {
+    "rank": 25,
+    "resolution": [
+      15,
+      12
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 35.0,
+    "cell_h_mm": 27.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 98.39
+  },
+  {
+    "rank": 26,
+    "resolution": [
+      16,
+      13
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 37.5,
+    "cell_h_mm": 30.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 98.35
+  },
+  {
+    "rank": 27,
+    "resolution": [
+      10,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 22.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 98.29
+  },
+  {
+    "rank": 28,
+    "resolution": [
+      10,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 27.0,
+    "cell_h_mm": 21.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 98.29
+  },
+  {
+    "rank": 29,
+    "resolution": [
+      10,
+      8
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 31.5,
+    "cell_h_mm": 24.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 98.29
+  },
+  {
+    "rank": 30,
+    "resolution": [
+      8,
+      15
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 35.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 31,
+    "resolution": [
+      8,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 42.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 32,
+    "resolution": [
+      10,
+      15
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 22.5,
+    "cell_h_mm": 35.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 33,
+    "resolution": [
+      8,
+      15
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 49.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 34,
+    "resolution": [
+      10,
+      15
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 27.0,
+    "cell_h_mm": 42.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 35,
+    "resolution": [
+      10,
+      15
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 31.5,
+    "cell_h_mm": 49.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 97.69
+  },
+  {
+    "rank": 36,
+    "resolution": [
+      10,
+      10
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 22.5,
+    "cell_h_mm": 22.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 97.62
+  },
+  {
+    "rank": 37,
+    "resolution": [
+      10,
+      10
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 27.0,
+    "cell_h_mm": 27.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 97.62
+  },
+  {
+    "rank": 38,
+    "resolution": [
+      10,
+      10
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 31.5,
+    "cell_h_mm": 31.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 97.62
+  },
+  {
+    "rank": 39,
+    "resolution": [
+      12,
+      10
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 27.5,
+    "cell_h_mm": 22.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 96.67
+  },
+  {
+    "rank": 40,
+    "resolution": [
+      12,
+      10
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 33.0,
+    "cell_h_mm": 27.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 96.67
+  },
+  {
+    "rank": 41,
+    "resolution": [
+      12,
+      10
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 38.5,
+    "cell_h_mm": 31.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 96.67
+  },
+  {
+    "rank": 42,
+    "resolution": [
+      8,
+      10
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 17.5,
+    "cell_h_mm": 22.5,
+    "reading_mode": "1-dedo",
+    "seq_capacity": 8,
+    "seq_in_range": true,
+    "coverage_pct": 96.03
+  },
+  {
+    "rank": 43,
+    "resolution": [
+      8,
+      10
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 21.0,
+    "cell_h_mm": 27.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 7,
+    "seq_in_range": true,
+    "coverage_pct": 96.03
+  },
+  {
+    "rank": 44,
+    "resolution": [
+      8,
+      10
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 24.5,
+    "cell_h_mm": 31.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 96.03
+  },
+  {
+    "rank": 45,
+    "resolution": [
+      12,
+      8
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 27.5,
+    "cell_h_mm": 17.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 6,
+    "seq_in_range": true,
+    "coverage_pct": 94.02
+  },
+  {
+    "rank": 46,
+    "resolution": [
+      12,
+      8
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 33.0,
+    "cell_h_mm": 21.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 5,
+    "seq_in_range": true,
+    "coverage_pct": 94.02
+  },
+  {
+    "rank": 47,
+    "resolution": [
+      12,
+      8
+    ],
+    "spacing_mm": 3.5,
+    "cell_w_mm": 38.5,
+    "cell_h_mm": 24.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 94.02
+  },
+  {
+    "rank": 48,
+    "resolution": [
+      15,
+      10
+    ],
+    "spacing_mm": 3.0,
+    "cell_w_mm": 42.0,
+    "cell_h_mm": 27.0,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 89.66
+  },
+  {
+    "rank": 49,
+    "resolution": [
+      15,
+      10
+    ],
+    "spacing_mm": 2.5,
+    "cell_w_mm": 35.0,
+    "cell_h_mm": 22.5,
+    "reading_mode": "multi-dedo",
+    "seq_capacity": 4,
+    "seq_in_range": true,
+    "coverage_pct": 89.66
+  }
+]

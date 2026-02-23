@@ -29,6 +29,8 @@ import unicodedata
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
+import json
+
 import numpy as np
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
@@ -39,6 +41,9 @@ from PIL import Image, ImageDraw, ImageFont
 FONT_PATH = pathlib.Path(__file__).parent / "elis.ttf"
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+# Arquivo de persistência da lista de candidatos viáveis gerada pelo último processamento
+CANDIDATES_FILE: pathlib.Path = OUTPUT_DIR / "candidatos_viaveis.json"
 
 # Resoluções candidatas (W×H) — número de pinos na matriz
 CANDIDATE_RESOLUTIONS: List[Tuple[int, int]] = [(10, 10), (15, 15), (20, 20)]
@@ -610,6 +615,105 @@ def _analyze_resolution_ext(
 
 
 # ---------------------------------------------------------------------------
+# Persistência e prompt interativo de candidatos viáveis
+# ---------------------------------------------------------------------------
+
+def _save_candidates(viable: List[ExtendedReport]) -> None:
+    """Serializa a lista de candidatos viáveis em JSON para uso futuro."""
+    data = [
+        {
+            "rank":         idx + 1,
+            "resolution":   list(er.resolution),
+            "spacing_mm":   er.spacing_mm,
+            "cell_w_mm":    er.cell_w_mm,
+            "cell_h_mm":    er.cell_h_mm,
+            "reading_mode": er.reading_mode,
+            "seq_capacity": er.seq_capacity,
+            "seq_in_range": er.seq_in_range,
+            "coverage_pct": round(er.report.coverage_pct, 2),
+        }
+        for idx, er in enumerate(viable)
+    ]
+    CANDIDATES_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+def _load_candidates() -> List[dict]:
+    """Carrega a lista de candidatos salva. Retorna lista vazia se não existir."""
+    if not CANDIDATES_FILE.exists():
+        return []
+    try:
+        return json.loads(CANDIDATES_FILE.read_text())
+    except Exception:
+        return []
+
+
+def _print_candidates_table(candidates: List[dict]) -> None:
+    """Imprime a tabela de candidatos no formato padrão."""
+    hdr = (
+        f"  {'#':<4} {'Resoluc':<8} {'Esp':>5}  "
+        f"{'W_mm':>6} {'H_mm':>6}  "
+        f"{'Modo':<14} {'Seq':>4}  {'Cob%':>6}"
+    )
+    print(hdr)
+    print("  " + "-" * 62)
+    for c in candidates:
+        cols, rows = c["resolution"]
+        print(
+            f"  {c['rank']:<4d} {cols:2d}x{rows:<5d} {c['spacing_mm']:4.1f}mm"
+            f"  {c['cell_w_mm']:6.1f} {c['cell_h_mm']:6.1f}"
+            f"  {c['reading_mode']:<14} {c['seq_capacity']:3d}"
+            f"  {c['coverage_pct']:5.1f}%"
+        )
+
+
+def _generate_from_saved(
+    candidates: List[dict],
+    profiles: List[GlyphProfile],
+) -> bool:
+    """
+    Exibe a lista salva, solicita escolha do usuário e gera a grade.
+    Retorna True se uma grade foi gerada (encerra o fluxo principal),
+    False se o usuário optou por não escolher.
+    """
+    sep = "=" * 68
+    print(f"\n{sep}")
+    print("  Lista de candidatos viáveis do último processamento")
+    print(sep)
+    _print_candidates_table(candidates)
+    print()
+    resp = input(
+        f"  Deseja gerar a grade de um candidato da lista? "
+        f"[1-{len(candidates)} / Enter para processar normalmente]: "
+    ).strip()
+
+    if not resp:
+        print("  -> Processamento completo será executado.\n")
+        return False
+
+    try:
+        idx = int(resp)
+        if not (1 <= idx <= len(candidates)):
+            raise ValueError
+    except ValueError:
+        print("  -> Entrada inválida. Processamento completo será executado.\n")
+        return False
+
+    chosen = candidates[idx - 1]
+    res    = tuple(chosen["resolution"])        # type: ignore[arg-type]
+    sp     = chosen["spacing_mm"]
+
+    print(f"\n  Gerando grade para {res[0]}x{res[1]} @ {sp:.1f} mm...")
+    # Reanalisa apenas o candidato escolhido
+    er = _analyze_resolution_ext(profiles, res, sp)  # type: ignore[arg-type]
+    grid_path = _save_grid(er.report, profiles)
+    print(f"  Grade salva em: {grid_path.relative_to(pathlib.Path.cwd())}")
+    print(f"  Cobertura: {er.report.coverage_pct:.1f}%  |  "
+          f"Modo: {er.reading_mode}  |  Seq: {er.seq_capacity} glifos/tira")
+    print(sep)
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Sumario por grupo
 # ---------------------------------------------------------------------------
 
@@ -633,6 +737,30 @@ def _group_summary(report: ResolutionReport) -> Dict[str, Dict[str, int]]:
 
 def main() -> None:
     sep = "=" * 68
+
+    # -----------------------------------------------------------------------
+    # [0] Verificar lista de candidatos salva
+    # -----------------------------------------------------------------------
+    saved = _load_candidates()
+    if saved:
+        print(sep)
+        print("  ELIS -- Analise de Viabilidade Tatil para Dispositivo Matricial")
+        print(sep)
+        print(f"\n  Encontrada lista salva em '{CANDIDATES_FILE.relative_to(pathlib.Path.cwd())}' "
+              f"com {len(saved)} candidatos.")
+        # Para usar a lista salva o usuário não precisa carregar os perfis antes
+        # — mas _generate_from_saved precisa dos perfis para renderizar o grid.
+        # Carregamos os perfis só se o usuário confirmar a escolha.
+        resp_pre = input(
+            "  Deseja consultar a lista salva antes de processar? [S/n]: "
+        ).strip().lower()
+        if resp_pre in ("", "s", "sim", "y", "yes"):
+            # Carrega perfis apenas neste ponto
+            print("\n  Carregando perfis para renderização...")
+            codepoints_pre = _collect_mapped_codepoints(FONT_PATH)
+            profiles_pre   = _build_profiles(codepoints_pre, FONT_PATH)
+            if _generate_from_saved(saved, profiles_pre):
+                return   # grade gerada — encerra sem processamento completo
 
     print(sep)
     print("  ELIS -- Analise de Viabilidade Tatil para Dispositivo Matricial")
@@ -761,22 +889,13 @@ def main() -> None:
         e.cell_w_mm * e.cell_h_mm,
     ))
 
+    # Salva/atualiza a lista de candidatos em disco
+    _save_candidates(viable)
+    print(f"  Lista de candidatos salva em '{CANDIDATES_FILE.relative_to(pathlib.Path.cwd())}'")
+
     print(f"\n  Candidatos viaveis ({len(viable)} encontrados):")
-    hdr = (
-        f"  {'Resoluc':<8} {'Esp':>5}  "
-        f"{'W_mm':>6} {'H_mm':>6}  "
-        f"{'Modo':<14} {'Seq':>4}  {'Cob%':>6}"
-    )
-    print(hdr)
-    print("  " + "-" * 56)
-    for er in viable[:25]:
-        cols, rows = er.resolution
-        print(
-            f"  {cols:2d}x{rows:<5d} {er.spacing_mm:4.1f}mm"
-            f"  {er.cell_w_mm:6.1f} {er.cell_h_mm:6.1f}"
-            f"  {er.reading_mode:<14} {er.seq_capacity:3d}"
-            f"  {er.report.coverage_pct:5.1f}%"
-        )
+    saved_for_display = _load_candidates()   # relê para confirmar escrita
+    _print_candidates_table(saved_for_display[:25])
 
     # Melhor candidato para leitura sequencial máxima
     best_seq = viable[0] if viable else None
