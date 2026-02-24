@@ -2,11 +2,30 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 
+export interface IsoCheck {
+  label: string
+  ok: boolean
+  detail: string
+}
+
+export interface PhysicsData {
+  resolution: string
+  spacing_mm: number
+  cell_w_mm: number
+  cell_h_mm: number
+  gap_mm: number
+  aspect_ratio: number | null
+  reading_mode: string
+  seq_capacity: number
+  iso: IsoCheck[]
+}
+
 export interface Model3DFileInfo {
   name: string
   size: number
   modified: string
   format: string
+  physics?: PhysicsData
 }
 
 export const useModel3DStore = defineStore('model3d', () => {

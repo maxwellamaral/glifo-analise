@@ -132,10 +132,34 @@
     <!-- Tooltip de metadados de arquivo PNG -->
     <Teleport to="body">
       <div v-if="tooltipVis" class="file-tooltip" :style="tooltipVisStyle">
-        <div class="tt-row"><span class="tt-label">Arquivo</span><span class="tt-val">{{ tooltipVis.name }}</span></div>
+        <!-- Seção: arquivo -->
+        <div class="tt-section-title">Arquivo</div>
+        <div class="tt-row"><span class="tt-label">Nome</span><span class="tt-val">{{ tooltipVis.name }}</span></div>
         <div class="tt-row"><span class="tt-label">Tipo</span><span class="tt-val">{{ parseVisFileType(tooltipVis.name) }}</span></div>
         <div class="tt-row"><span class="tt-label">Tamanho</span><span class="tt-val">{{ formatVisSize(tooltipVis.size) }}</span></div>
         <div class="tt-row"><span class="tt-label">Modificado</span><span class="tt-val">{{ formatVisDate(tooltipVis.modified) }}</span></div>
+
+        <!-- Seção: física da célula -->
+        <template v-if="tooltipVis.physics">
+          <div class="tt-divider"></div>
+          <div class="tt-section-title">Física da Célula</div>
+          <div class="tt-row"><span class="tt-label">Resolução</span><span class="tt-val">{{ tooltipVis.physics.resolution }}</span></div>
+          <div class="tt-row"><span class="tt-label">Espaçamento</span><span class="tt-val">{{ tooltipVis.physics.spacing_mm.toFixed(1) }} mm</span></div>
+          <div class="tt-row"><span class="tt-label">Célula W×H</span><span class="tt-val">{{ tooltipVis.physics.cell_w_mm.toFixed(1) }} × {{ tooltipVis.physics.cell_h_mm.toFixed(1) }} mm</span></div>
+          <div class="tt-row"><span class="tt-label">Gap</span><span class="tt-val">{{ tooltipVis.physics.gap_mm.toFixed(1) }} mm</span></div>
+          <div class="tt-row"><span class="tt-label">Aspecto</span><span class="tt-val">{{ tooltipVis.physics.aspect_ratio?.toFixed(2) }}×</span></div>
+          <div class="tt-row"><span class="tt-label">Modo</span><span class="tt-val tt-mode" :data-mode="tooltipVis.physics.reading_mode">{{ tooltipVis.physics.reading_mode }}</span></div>
+          <div class="tt-row"><span class="tt-label">Glifos/tira</span><span class="tt-val">{{ tooltipVis.physics.seq_capacity }}</span></div>
+
+          <!-- Seção: ISO 11548-2 -->
+          <div class="tt-divider"></div>
+          <div class="tt-section-title">ISO 11548-2</div>
+          <div v-for="c in tooltipVis.physics.iso" :key="c.label" class="tt-iso-row">
+            <span class="tt-iso-badge" :class="c.ok ? 'ok' : 'fail'">{{ c.ok ? '✓' : '✗' }}</span>
+            <span class="tt-iso-label">{{ c.label }}</span>
+            <span class="tt-iso-detail">{{ c.detail }}</span>
+          </div>
+        </template>
       </div>
     </Teleport>
   </div>
@@ -314,7 +338,14 @@ function closeLightbox() {
 }
 
 // ── Arquivos PNG existentes ───────────────────────────────────────────────────
-interface VisFileInfo { name: string; size: number; modified: string }
+interface IsoCheck { label: string; ok: boolean; detail: string }
+interface PhysicsData {
+  resolution: string; spacing_mm: number
+  cell_w_mm: number; cell_h_mm: number; gap_mm: number
+  aspect_ratio: number | null; reading_mode: string; seq_capacity: number
+  iso: IsoCheck[]
+}
+interface VisFileInfo { name: string; size: number; modified: string; physics?: PhysicsData }
 const visFiles = ref<VisFileInfo[]>([])
 const visFilesOpen = ref(false)
 
@@ -594,14 +625,43 @@ h2 { margin: 0 0 .5rem; }
   background: var(--surface);
   border: 1px solid var(--accent);
   border-radius: 6px;
-  padding: .6rem .85rem;
-  font-size: .8rem;
+  padding: .65rem .9rem;
+  font-size: .78rem;
   pointer-events: none;
   box-shadow: 0 4px 18px rgba(0,0,0,.45);
-  min-width: 260px;
+  min-width: 300px;
+  max-width: 380px;
 }
-.tt-row { display: flex; gap: .5rem; margin-bottom: .25rem; }
-.tt-row:last-child { margin-bottom: 0; }
-.tt-label { color: var(--muted); min-width: 80px; flex-shrink: 0; }
+.tt-section-title {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--primary);
+  margin-bottom: .3rem;
+  margin-top: .1rem;
+}
+.tt-divider { border-top: 1px solid var(--accent); margin: .45rem 0 .4rem; }
+.tt-row { display: flex; gap: .5rem; margin-bottom: .2rem; align-items: baseline; }
+.tt-label { color: var(--muted); min-width: 90px; flex-shrink: 0; }
 .tt-val { color: var(--text); word-break: break-all; }
+.tt-mode[data-mode="1-dedo"]          { color: #4caf50; }
+.tt-mode[data-mode="multi-dedo"]      { color: #ff9800; }
+.tt-mode[data-mode="fora-de-alcance"] { color: #f44336; }
+.tt-iso-row {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin-bottom: .18rem;
+}
+.tt-iso-badge {
+  font-size: .75rem;
+  font-weight: 700;
+  min-width: 1.1rem;
+  text-align: center;
+}
+.tt-iso-badge.ok   { color: #4caf50; }
+.tt-iso-badge.fail { color: #f44336; }
+.tt-iso-label { color: var(--muted); flex: 1; }
+.tt-iso-detail { color: var(--text); white-space: nowrap; }
 </style>

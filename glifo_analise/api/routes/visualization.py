@@ -31,6 +31,7 @@ from glifo_analise.output.preview import (
 )
 
 from glifo_analise.analysis.resolution import _analyze_resolution_ext
+from glifo_analise.analysis.physical import _physics_from_filename
 
 router = APIRouter(prefix="/api/visualization", tags=["visualization"])
 
@@ -181,6 +182,7 @@ async def list_visualization_files() -> List[Dict[str, Any]]:
                 "name": p.name,
                 "size": stat.st_size,
                 "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                "physics": _physics_from_filename(p.name),
             })
     return result
 

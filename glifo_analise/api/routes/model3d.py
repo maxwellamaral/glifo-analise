@@ -20,6 +20,7 @@ from glifo_analise import config
 from glifo_analise.analysis.bitmap import _build_profiles, _collect_mapped_codepoints
 from glifo_analise.api.state import AppState, get_state
 from glifo_analise.output.model3d import DEFAULT_TACTILE_SEQUENCE, _generate_tactile_3d
+from glifo_analise.analysis.physical import _physics_from_filename
 
 router = APIRouter(prefix="/api/model3d", tags=["model3d"])
 
@@ -102,6 +103,7 @@ async def list_model_files() -> List[Dict[str, Any]]:
                 "size": stat.st_size,
                 "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
                 "format": p.suffix.lstrip(".").upper(),
+                "physics": _physics_from_filename(p.name),
             })
     return result
 
