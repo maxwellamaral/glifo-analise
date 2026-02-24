@@ -113,6 +113,14 @@ def _analyze_resolution_ext(
     rows: int,
     spacing_mm: float,
     profiles: List[GlyphProfile],
+    *,
+    density_min: float = DENSITY_MIN,
+    density_max: float = DENSITY_MAX,
+    edge_complexity_min: float = EDGE_COMPLEXITY_MIN,
+    iou_min: float = 0.15,
+    max_finger_area_mm: float = MAX_FINGER_AREA_MM,
+    max_multi_finger_mm: float = MAX_MULTI_FINGER_MM,
+    seq_glyph_min: int = SEQ_GLYPH_MIN,
 ) -> ExtendedReport:
     """
     Analisa a fonte para uma resolução M×N e um espaçamento configurável.
@@ -122,6 +130,13 @@ def _analyze_resolution_ext(
         rows: Número de linhas (pinos na direção Y).
         spacing_mm: Espaçamento centro a centro entre pinos (mm).
         profiles: Perfis de glifos carregados.
+        density_min: Limiar mínimo de densidade de pixels (padrão 0,03).
+        density_max: Limiar máximo de densidade de pixels (padrão 0,55).
+        edge_complexity_min: Limiar mínimo de complexidade de borda (padrão 0,08).
+        iou_min: Limiar mínimo de IoU para fidelidade estrutural (padrão 0,15).
+        max_finger_area_mm: Dimensão máxima para modo 1-dedo em mm (padrão 25,0).
+        max_multi_finger_mm: Dimensão máxima para modo multi-dedo em mm (padrão 55,0).
+        seq_glyph_min: Capacidade sequencial mínima (padrão 4).
 
     Returns:
         ExtendedReport com análise completa.
@@ -134,15 +149,15 @@ def _analyze_resolution_ext(
     cell_h_mm = (eff_res[1] - 1) * spacing_mm
     max_dim   = max(cell_w_mm, cell_h_mm)
 
-    if max_dim <= MAX_FINGER_AREA_MM:
+    if max_dim <= max_finger_area_mm:
         mode = "1-dedo"
-        limit_mm = MAX_FINGER_AREA_MM
-    elif max_dim <= MAX_MULTI_FINGER_MM:
+        limit_mm = max_finger_area_mm
+    elif max_dim <= max_multi_finger_mm:
         mode = "multi-dedo"
-        limit_mm = MAX_MULTI_FINGER_MM
+        limit_mm = max_multi_finger_mm
     else:
         mode = "fora-de-alcance"
-        limit_mm = MAX_MULTI_FINGER_MM
+        limit_mm = max_multi_finger_mm
 
     fits = max_dim <= limit_mm
 
@@ -168,15 +183,15 @@ def _analyze_resolution_ext(
         ec  = _edge_complexity(bm)
         iou = _iou(p.bitmap_ref, bm)
 
-        density_ok    = DENSITY_MIN <= d <= DENSITY_MAX
-        iou_ok        = iou >= 0.15
-        complexity_ok = ec >= EDGE_COMPLEXITY_MIN
+        density_ok    = density_min <= d <= density_max
+        iou_ok        = iou >= iou_min
+        complexity_ok = ec >= edge_complexity_min
 
         if not fits:
             verdict = "TAMANHO_GRANDE"
-        elif d < DENSITY_MIN:
+        elif d < density_min:
             verdict = "VAZIO"
-        elif d > DENSITY_MAX:
+        elif d > density_max:
             verdict = "SATURADO"
         elif not complexity_ok:
             verdict = "RASO"
@@ -212,6 +227,6 @@ def _analyze_resolution_ext(
         cell_w_mm=cell_w_mm, cell_h_mm=cell_h_mm,
         reading_mode=mode,
         seq_capacity=seq_cap,
-        seq_in_range=seq_cap >= SEQ_GLYPH_MIN,
+        seq_in_range=seq_cap >= seq_glyph_min,
         report=inner,
     )
