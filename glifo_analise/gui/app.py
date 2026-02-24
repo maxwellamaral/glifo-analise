@@ -6,7 +6,7 @@ A interface gráfica atual é servida pelo backend FastAPI em:
 
     uv run glifo-gui   →   http://localhost:8080
 
-O código legado da CLI monolítica está em main_legacy.py.
+O código legado da CLI monolítica está em scripts/main_legacy.py.
 Os assets estáticos do viewer 3D (Three.js) estão em:
 
     glifo_analise/gui/static/viewer3d.html  (reutilizado pelo frontend Vue 3)

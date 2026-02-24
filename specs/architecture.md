@@ -19,6 +19,12 @@ glifo-analise/                    ← raiz do projeto
 │
 ├── elis.ttf                      ← fonte ELIS (asset)
 ├── main.py                       ← shim CLI: `from glifo_analise.cli.main import main`
+├── gui.py                        ← shim GUI: `from glifo_analise.api.main import app`
+├── scripts/                      ← scripts auxiliares (não fazem parte do pacote)
+│   ├── dev.sh                    ← dev mode: FastAPI + Vite hot-reload
+│   ├── start.sh                  ← produção: FastAPI serve dist/
+│   ├── main_legacy.py            ← CLI monolítica original (referência histórica)
+│   └── generate_glyph_images.py  ← gera imagens PNG dos glifos ELiS
 ├── pyproject.toml
 ├── uv.lock
 ├── LICENSE                       ← MIT com cláusula de atribuição

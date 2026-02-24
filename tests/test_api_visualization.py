@@ -132,22 +132,22 @@ class TestGenerateCells:
 class TestGenerateGrid:
     """POST /api/visualization/generate — tipo 'grid'"""
 
-    def test_returns_400_without_analysis(self, client: TestClient) -> None:
-        """Sem análise prévia em memória, deve retornar 400 com mensagem clara."""
+    def test_returns_200_and_generates_grid_without_analysis(self, client: TestClient) -> None:
+        """Sem análise prévia, a rota re-analisa internamente e retorna 200 com 'file'."""
         resp = client.post(
             "/api/visualization/generate",
             json={"type": "grid", "candidate": SAMPLE_CANDIDATE, "sequence": ""},
         )
-        assert resp.status_code == 400
+        assert resp.status_code == 200
+        assert "file" in resp.json()
 
-    def test_error_message_informative(self, client: TestClient) -> None:
+    def test_grid_file_is_png(self, client: TestClient) -> None:
         resp = client.post(
             "/api/visualization/generate",
             json={"type": "grid", "candidate": SAMPLE_CANDIDATE, "sequence": ""},
         )
         body = resp.json()
-        assert "detail" in body
-        assert len(body["detail"]) > 0
+        assert body["file"].endswith(".png")
 
 
 # ── Validação de payload ──────────────────────────────────────────────────────

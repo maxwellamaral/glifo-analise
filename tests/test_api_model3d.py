@@ -144,12 +144,13 @@ class TestListFiles:
     def test_lists_3mf_after_generate(
         self, client: TestClient, tmp_path: pathlib.Path
     ) -> None:
-        """Após gerar um modelo, deve aparecer na lista."""
+        """Após gerar um modelo, deve aparecer na lista com metadados."""
         # Cria arquivo fake para simular geração
         fake = tmp_path / "tatil_3d_13x13_2.5mm_tqlDà.3mf"
         fake.write_bytes(b"fake-3mf-content")
         body = client.get("/api/model3d/files").json()
-        assert fake.name in body
+        names = [f["name"] for f in body]
+        assert fake.name in names
 
     def test_only_3mf_and_stl_returned(
         self, client: TestClient, tmp_path: pathlib.Path
@@ -158,8 +159,8 @@ class TestListFiles:
         (tmp_path / "preview.png").write_bytes(b"fake")
         (tmp_path / "candidatos.json").write_text("{}")
         body = client.get("/api/model3d/files").json()
-        for name in body:
-            assert name.endswith(".3mf") or name.endswith(".stl")
+        for item in body:
+            assert item["name"].endswith(".3mf") or item["name"].endswith(".stl")
 
 
 # ── US-M3 e US-M4: GET /output/{filename} ────────────────────────────────────

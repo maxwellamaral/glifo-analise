@@ -36,8 +36,8 @@ specs/
 !README.md              # mantém README no contexto (usado como metadado)
 
 # ── Scripts de desenvolvimento ────────────────────────────────────────────────
-dev.sh
-start.sh
+scripts/dev.sh
+scripts/start.sh
 
 # ── Controle de versão ────────────────────────────────────────────────────────
 .git/

@@ -290,12 +290,12 @@ uv run glifo-gui         # interface gráfica no browser (http://localhost:8080)
 
 | Script | Modo | Descrição |
 |--------|------|-----------|
-| `./start.sh` | Produção | Sobe o FastAPI servindo o `frontend/dist/` em http://localhost:8080 (compila o frontend automaticamente se necessário) |
-| `./dev.sh` | Desenvolvimento | Sobe FastAPI (porta 8080) + Vite dev server com hot-reload (porta 5173) |
+| `./scripts/start.sh` | Produção | Sobe o FastAPI servindo o `frontend/dist/` em http://localhost:8080 (compila o frontend automaticamente se necessário) |
+| `./scripts/dev.sh` | Desenvolvimento | Sobe FastAPI (porta 8080) + Vite dev server com hot-reload (porta 5173) |
 
 ```bash
-./start.sh   # produção — http://localhost:8080
-./dev.sh     # desenvolvimento — http://localhost:5173 (hot-reload)
+./scripts/start.sh   # produção — http://localhost:8080
+./scripts/dev.sh     # desenvolvimento — http://localhost:5173 (hot-reload)
 ```
 
 > **Testes:**
