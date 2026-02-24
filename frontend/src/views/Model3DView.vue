@@ -8,7 +8,10 @@
 
     <template v-else>
       <div class="card mt-1 controls">
-        <label>Sequência: <input v-model="sequence" class="inp inp-elis" /></label>
+        <label class="label-seq">Sequência:
+          <input v-model="sequence" class="inp inp-elis" />
+          <button class="btn-picker" title="Mapa de glifos ELIS" @click="showPicker = true">⌨</button>
+        </label>
         <label>Formato:
           <select v-model="fmt" class="inp">
             <option value="3mf">3MF</option>
@@ -56,6 +59,10 @@
         </ul>
       </div>
     </template>
+
+    <!-- Mapa de glifos ELIS -->
+    <GlyphPickerModal v-if="showPicker" v-model="sequence" @close="showPicker = false" />
+
   </div>
 </template>
 
@@ -63,11 +70,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useCandidatesStore } from '@/stores/candidates'
 import { useModel3DStore } from '@/stores/model3d'
+import GlyphPickerModal from '@/components/GlyphPickerModal.vue'
 
 const candidates = useCandidatesStore()
 const model3d = useModel3DStore()
 
 const sequence = ref('tqlDà')
+const showPicker = ref(false)
 const fmt = ref<'3mf' | 'stl'>('3mf')
 const fullTest = ref(false)
 
@@ -149,4 +158,12 @@ h3 { margin: 0 0 .5rem; font-size: 1rem; }
   padding: .3rem .7rem; cursor: pointer;
   text-decoration: none; font-size: .85rem;
 }
+.label-seq { display: flex; align-items: center; gap: .4rem; }
+.btn-picker {
+  background: var(--accent); color: var(--text);
+  border: 1px solid var(--accent); border-radius: 4px;
+  padding: .22rem .5rem; cursor: pointer; font-size: .9rem;
+  line-height: 1; transition: border-color .15s;
+}
+.btn-picker:hover { border-color: var(--primary); color: var(--primary); }
 </style>

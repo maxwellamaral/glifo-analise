@@ -174,3 +174,34 @@ async def analysis_status(state: AppState = Depends(get_state)) -> Dict[str, Any
             "task_id": state.task_id,
             "error": state.task_error,
         }
+
+
+@router.get("/glyphs")
+async def list_glyphs() -> List[Dict[str, Any]]:
+    """Retorna todos os glifos disponíveis na fonte ELIS, agrupados por categoria.
+
+    Cada item contém: ``codepoint`` (int), ``char`` (str), ``group`` (str).
+    Glifos intencionalmente em branco (SPACE etc.) são excluídos.
+    """
+    codepoints = _collect_mapped_codepoints(config.FONT_PATH)
+
+    def _group(cp: int) -> str:
+        if 0x0041 <= cp <= 0x005A:
+            return "Maiúsculas"
+        if 0x0061 <= cp <= 0x007A:
+            return "Minúsculas"
+        if 0x0030 <= cp <= 0x0039:
+            return "Dígitos"
+        if 0x0021 <= cp <= 0x002F or 0x003A <= cp <= 0x0040 or 0x005B <= cp <= 0x0060:
+            return "Símbolos"
+        if cp >= 0x00A0:
+            return "Estendidos"
+        return "Outros"
+
+    blank = {0x0020, 0x00A0, 0x200B, 0x200C, 0x200D, 0xFEFF}
+    result = []
+    for cp in codepoints:
+        if cp in blank:
+            continue
+        result.append({"codepoint": cp, "char": chr(cp), "group": _group(cp)})
+    return result

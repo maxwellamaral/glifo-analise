@@ -8,7 +8,10 @@
 
     <template v-else>
       <div class="card mt-1 controls">
-        <label>Sequência: <input v-model="sequence" class="inp inp-elis" /></label>
+        <label class="label-seq">Sequência:
+          <input v-model="sequence" class="inp inp-elis" />
+          <button class="btn-picker" title="Mapa de glifos ELIS" @click="showPicker = true">⌨</button>
+        </label>
         <label>Tipo:
           <select v-model="visType" class="inp">
             <option value="strip">Tira completa</option>
@@ -86,6 +89,9 @@
       </div>
     </template>
 
+    <!-- Mapa de glifos ELIS -->
+    <GlyphPickerModal v-if="showPicker" v-model="sequence" @close="showPicker = false" />
+
     <!-- Lightbox para células individuais -->
     <Teleport to="body">
       <div v-if="lightboxSrc" class="lightbox-overlay" @click.self="closeLightbox">
@@ -103,9 +109,11 @@
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { useCandidatesStore } from '@/stores/candidates'
+import GlyphPickerModal from '@/components/GlyphPickerModal.vue'
 
 const candidates = useCandidatesStore()
 const sequence = ref('tqlDà')
+const showPicker = ref(false)
 const visType = ref<'strip' | 'cells' | 'grid'>('strip')
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -433,4 +441,12 @@ h2 { margin: 0 0 .5rem; }
   border: none; border-radius: 4px;
   padding: .2rem .6rem; cursor: pointer; text-decoration: none; font-size: .85rem;
 }
+.label-seq { display: flex; align-items: center; gap: .4rem; }
+.btn-picker {
+  background: var(--accent); color: var(--text);
+  border: 1px solid var(--accent); border-radius: 4px;
+  padding: .22rem .5rem; cursor: pointer; font-size: .9rem;
+  line-height: 1; transition: border-color .15s;
+}
+.btn-picker:hover { border-color: var(--primary); color: var(--primary); }
 </style>
