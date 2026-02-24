@@ -63,6 +63,11 @@ def create_app() -> FastAPI:
     # ── WebSocket ─────────────────────────────────────────────────────────────
     app.add_websocket_route("/api/ws/progress", _ws_progress_endpoint)
 
+    # ── Arquivos de saída (modelos 3D, imagens) ─────────────────────────────
+    output_dir = pathlib.Path(__file__).parents[2] / "output"
+    output_dir.mkdir(exist_ok=True)
+    app.mount("/output", StaticFiles(directory=str(output_dir)), name="output")
+
     # ── SPA (Vue 3 / Vite dist) — montada por último ─────────────────────────
     dist = pathlib.Path(__file__).parents[2] / "frontend" / "dist"
     if dist.exists():

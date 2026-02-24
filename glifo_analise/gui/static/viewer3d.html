@@ -84,6 +84,9 @@
       white-space: nowrap;
     }
     .tb-btn:hover { background: #2d3748; color: #fff; }
+    .tb-btn.active { background: rgba(99,179,237,0.15); border-color: #63b3ed; color: #90cdf4; }
+    .tb-sep { width: 100%; height: 1px; background: #2d3748; margin: 2px 0; }
+    .tb-label { font-size: 10px; color: #4a5568; padding: 2px 4px; text-transform: uppercase; letter-spacing: .06em; }
 
     /* ── Painel de dimensões ── */
     #dims-panel {
@@ -152,6 +155,13 @@
     <button class="tb-btn" id="btn-wire">◻ Wireframe</button>
     <button class="tb-btn" id="btn-top">⬆ Vista superior</button>
     <button class="tb-btn" id="btn-front">⬛ Vista frontal</button>
+    <button class="tb-btn" id="btn-fs">⤢ Tela cheia</button>
+    <div class="tb-sep"></div>
+    <span class="tb-label">Iluminação</span>
+    <button class="tb-btn tb-light active" id="lp-padrao">⬟ Padrão</button>
+    <button class="tb-btn tb-light" id="lp-studio">◎ Studio</button>
+    <button class="tb-btn tb-light" id="lp-rasante">◈ Rasante</button>
+    <button class="tb-btn tb-light" id="lp-dramatico">◐ Dramático</button>
   </div>
 
   <div id="info-bar">
@@ -188,12 +198,22 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
+    // Headlight: ponto de luz acoplado à câmera — garante que o modelo
+    // nunca fique completamente negro independente do ângulo de visão
+    const headLight = new THREE.PointLight(0xffffff, 0.6, 0);
+    camera.add(headLight);
+    scene.add(camera);  // câmera precisa estar na cena para a luz funcionar
+
     // ── Iluminação ──────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
 
     const dir1 = new THREE.DirectionalLight(0xffffff, 1.4);
     dir1.position.set(80, 120, 60);
@@ -207,6 +227,36 @@
 
     const hemiLight = new THREE.HemisphereLight(0x223366, 0x0f1117, 0.4);
     scene.add(hemiLight);
+
+    // ── Presets de iluminação ────────────────────────────────────────────────
+    const LIGHT_PRESETS = {
+      padrao:   { amb: 0.8,  d1i: 1.4, d1p: [80,  120,  60], d1c: 0xffffff,
+                             d2i: 0.5, d2p: [-60, -30, -80], d2c: 0x6699ff, hemi: 0.5 },
+      studio:   { amb: 1.2,  d1i: 1.0, d1p: [0,   200,   0], d1c: 0xffffff,
+                             d2i: 0.8, d2p: [0,  -200,   0], d2c: 0xffffff, hemi: 0.8 },
+      // Luz rasante: incide de lado a baixo ângulo — realça relevo dos pinos
+      rasante:  { amb: 0.5,  d1i: 3.0, d1p: [300,  15,   0], d1c: 0xfff8e7,
+                             d2i: 0.3, d2p: [0,    80, 200], d2c: 0x4466cc, hemi: 0.3 },
+      dramatico:{ amb: 0.4,  d1i: 2.8, d1p: [100, 200,  50], d1c: 0xffeecc,
+                             d2i: 0.3, d2p: [-80, -40, -60], d2c: 0x223399, hemi: 0.15 },
+    };
+
+    function applyLightPreset(name) {
+      const p = LIGHT_PRESETS[name];
+      if (!p) return;
+      ambientLight.intensity = p.amb;
+      dir1.intensity = p.d1i;
+      dir1.color.setHex(p.d1c);
+      dir1.position.set(...p.d1p);
+      dir2.intensity = p.d2i;
+      dir2.color.setHex(p.d2c);
+      dir2.position.set(...p.d2p);
+      hemiLight.intensity = p.hemi;
+      // Atualiza botão ativo
+      document.querySelectorAll('.tb-light').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`lp-${name}`);
+      if (btn) btn.classList.add('active');
+    }
 
     // ── Grid & Eixos ────────────────────────────────────────────────────────
     const gridHelper = new THREE.GridHelper(300, 30, 0x1a2040, 0x141a30);
@@ -233,10 +283,10 @@
 
     // ── Material padrão ─────────────────────────────────────────────────────
     function _buildMaterial() {
-      return new THREE.MeshPhongMaterial({
+      return new THREE.MeshStandardMaterial({
         color:     0x4fc3f7,
-        specular:  0x7ecfee,
-        shininess: 90,
+        roughness: 0.55,
+        metalness: 0.05,
         side:      THREE.DoubleSide,
       });
     }
@@ -334,6 +384,7 @@
             modelMaterial = _buildMaterial();
             group.traverse((child) => {
               if (child.isMesh) {
+                child.geometry.computeVertexNormals();
                 child.material      = modelMaterial;
                 child.castShadow    = true;
                 child.receiveShadow = true;
@@ -394,6 +445,38 @@
       camera.position.set(center.x, center.y, center.z + dist);
       controls.target.copy(center);
       controls.update();
+    });
+
+    ['padrao', 'studio', 'rasante', 'dramatico'].forEach(name => {
+      document.getElementById(`lp-${name}`)?.addEventListener('click', () => applyLightPreset(name));
+    });
+
+    // ── Tela cheia ─────────────────────────────────────────────────────────
+    const btnFs = document.getElementById('btn-fs');
+    btnFs.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = !!document.fullscreenElement;
+      btnFs.textContent = isFs ? '⤡ Sair da tela cheia' : '⤢ Tela cheia';
+      btnFs.classList.toggle('active', isFs);
+      // Atualiza renderer após mudança de tamanho
+      setTimeout(() => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }, 100);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
     });
 
     // ── Comunicação via postMessage (página pai → iframe) ────────────────────

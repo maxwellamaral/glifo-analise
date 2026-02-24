@@ -8,7 +8,7 @@
 
     <template v-else>
       <div class="card mt-1 controls">
-        <label>Sequência: <input v-model="sequence" class="inp" /></label>
+        <label>Sequência: <input v-model="sequence" class="inp inp-elis" /></label>
         <label>Formato:
           <select v-model="fmt" class="inp">
             <option value="3mf">3MF</option>
@@ -36,6 +36,7 @@
           v-if="model3d.currentFile?.endsWith('.3mf') || model3d.currentFile?.endsWith('.stl')"
           :src="viewerSrc"
           class="viewer-frame"
+          allowfullscreen
         />
       </div>
 
@@ -73,7 +74,7 @@ const fullTest = ref(false)
 const viewerSrc = computed(() => {
   if (!model3d.currentFile) return ''
   const fileUrl = encodeURIComponent(model3d.currentFile)
-  return `/static/viewer3d.html?model=${fileUrl}`
+  return `/static/viewer3d.html?file=${fileUrl}`
 })
 
 async function gen() {
@@ -89,6 +90,13 @@ onMounted(() => model3d.fetchFiles())
 </script>
 
 <style scoped>
+@font-face {
+  font-family: 'ELIS';
+  src: url('/static/elis.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .view { max-width: 900px; }
 h2 { margin: 0 0 .5rem; }
 h3 { margin: 0 0 .5rem; font-size: 1rem; }
@@ -106,6 +114,7 @@ h3 { margin: 0 0 .5rem; font-size: 1rem; }
 .controls label { display: flex; align-items: center; gap: .4rem; font-size: .9rem; }
 .checkbox-label { gap: .5rem; cursor: pointer; }
 .inp { background: var(--bg); color: var(--text); border: 1px solid var(--accent); border-radius: 4px; padding: .25rem .5rem; }
+.inp-elis { font-family: 'ELIS', monospace; font-size: 1.15rem; letter-spacing: .05em; min-width: 12ch; }
 .btn-primary { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: .4rem 1rem; cursor: pointer; }
 .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 
