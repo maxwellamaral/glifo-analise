@@ -110,5 +110,6 @@ glifos são reproduzíveis respeitando limiares psicofísicos táteis (ISO 11548
 | RNF-10 | Licença | Código licenciado sob MIT com cláusula de atribuição; arquivos de citação acadêmica (`CITATION.bib`, `CITATION.cff`) incluídos no repositório. |
 | RNF-11 | Usabilidade | Mapa de Glifos ELIS (RF-07.8) deve exibir todos os glifos na fonte ELIS renderizados com `font-family: 'ELIS'`; interação por clique simples sem necessidade de arrastar ou confirmar para inserção imediata. |
 | RNF-12 | Usabilidade | Parâmetros de análise (RF-07.9) devem ter valores padrão carregados do backend; qualquer alteração persiste apenas na sessão corrente (sem escrita em disco). |
+| RNF-13 | Portabilidade | O sistema deve poder ser executado em container Docker sem necessidade de instalar Python, Node.js ou `uv` no host. A imagem é multi-stage (Node → Python/uv → final), priorizando cache de camadas (`uv sync --no-install-project` antes de copiar o código-fonte). Arquivos gerados são persistidos via volume `./output/`. |
 | RNF-08 | Padrões | Python 3.10+ com type hints; docstrings Google Style; `uv` como gerenciador de pacotes. |
 | RNF-09 | Segurança | GUI sem autenticação (uso local); não expor em redes públicas. |

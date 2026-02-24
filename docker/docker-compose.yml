@@ -1,0 +1,33 @@
+# =============================================================================
+# Glifo Análise — Docker Compose
+# =============================================================================
+# Uso:
+#   ./docker/manage.sh build   → constrói a imagem
+#   ./docker/manage.sh up      → sobe o container em background
+#   ./docker/manage.sh down    → derruba o container
+#   ./docker/manage.sh logs    → acompanha os logs
+#
+# Ou diretamente (a partir da raiz do projeto):
+#   docker compose -f docker/docker-compose.yml up -d
+# =============================================================================
+
+services:
+  glifo-analise:
+    build:
+      context: ..                          # raiz do projeto como contexto
+      dockerfile: docker/Dockerfile
+    image: glifo-analise:latest
+    container_name: glifo-analise
+    ports:
+      - "8080:8080"
+    volumes:
+      # Persiste arquivos gerados (PNG, 3MF, STL, JSON) fora do container
+      - ../output:/app/output
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/analysis/status')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

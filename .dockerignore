@@ -1,0 +1,56 @@
+# =============================================================================
+# .dockerignore — Glifo Análise
+# Exclui arquivos desnecessários do contexto de build Docker,
+# reduzindo o tamanho do contexto enviado ao daemon e acelerando o build.
+# =============================================================================
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/          # rebuilado durante o estágio frontend-build
+frontend/.vite/
+
+# ── Artefatos gerados em runtime ──────────────────────────────────────────────
+output/
+
+# ── Testes e documentação ─────────────────────────────────────────────────────
+tests/
+specs/
+*.md
+!README.md              # mantém README no contexto (usado como metadado)
+
+# ── Scripts de desenvolvimento ────────────────────────────────────────────────
+dev.sh
+start.sh
+
+# ── Controle de versão ────────────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── IDE e OS ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Docker (sem recursão no próprio build) ────────────────────────────────────
+.dockerignore

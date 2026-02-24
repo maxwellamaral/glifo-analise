@@ -20,10 +20,16 @@ glifo-analise/                    ← raiz do projeto
 ├── elis.ttf                      ← fonte ELIS (asset)
 ├── main.py                       ← shim CLI: `from glifo_analise.cli.main import main`
 ├── pyproject.toml
+├── uv.lock
 ├── LICENSE                       ← MIT com cláusula de atribuição
 ├── CITATION.bib                  ← BibLaTeX (@software) + ABNT (@misc)
 ├── CITATION.cff                  ← Citation File Format v1.2 (GitHub auto-detect)
-├── README.md                     ← inclui seções Autoria, Citação e Licença
+├── README.md                     ← inclui seções Autoria, Citação, Licença e Docker
+├── .dockerignore                 ← exclui artefatos do contexto de build Docker
+├── docker/                       ← suporte a container (opcional)
+│   ├── Dockerfile                ← build multi-stage: Node → Python/uv → final
+│   ├── docker-compose.yml        ← orquestração com volume para ./output/
+│   └── manage.sh                 ← script: build/up/down/logs/shell/status/clean
 ├── specs/
 │
 ├── output/                       ← artefatos gerados (PNG, STL, 3MF, JSON)
@@ -230,3 +236,5 @@ Vue 3 (browser)                   FastAPI (backend)
 | `GET /api/analysis/glyphs` retorna glifos por grupo | Separa a lógica de categorização (Maiúsculas/Minúsculas/Dígitos/Símbolos/Estendidos) no backend, mantendo o frontend agnóstico à fonte ELIS. |
 | Parâmetros de análise via `GET /api/analysis/params/defaults` | Permite que o frontend carregue os valores padrão definidos em `config.py` sem hardcoding; parâmetros customizados passados no body de `POST /api/analysis/run`. |
 | `LICENSE` MIT + cláusula de atribuição | Compatível com uso acadêmico e pesquisa; `CITATION.cff` habilita botão de citação automático no GitHub. |
+| Docker multi-stage em `docker/Dockerfile` | Estágio `frontend-build` (node:22-slim) + `python-deps` (python:3.12-slim + uv) + `final`: cache máximo — deps são re-instaladas apenas quando `uv.lock` ou `package-lock.json` mudam. `uv sync --no-install-project` separa deps de código-fonte para hot-cache. |
+| Volume `./output/` montado no container | Arquivos gerados (PNG, 3MF, STL, JSON) persistem no host após `docker compose down`, sem necessidade de `docker cp`. |

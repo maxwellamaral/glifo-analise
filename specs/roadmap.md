@@ -23,6 +23,16 @@
   - `GlyphPickerModal.vue` — modal estilo Character Map com abas por grupo,
     painel de prévia, inserção imediata e remoção Unicode-safe
   - Integrado em `VisualizationView.vue` e `Model3DView.vue`
+- ✅ **Fase 8 — Suporte a Docker** — **CONCLUÍDA**
+  - `docker/Dockerfile` multi-stage: estágios `frontend-build` (node:22-slim),
+    `python-deps` (python:3.12-slim + uv) e `final`
+  - `docker/docker-compose.yml` com volume mapeado para `./output/`
+  - `docker/manage.sh` com comandos `build / up / down / restart / logs / shell / status / clean`
+  - `.dockerignore` na raiz do projeto
+  - Build validado: **17.7 s** na primeira execução; re-build sem mudança de deps
+    usa 100% de cache (< 2 s)
+  - Testado: `GET /api/analysis/status` e `GET /api/analysis/glyphs` respondendo
+    corretamente dentro do container
 
 ---
 
@@ -151,6 +161,26 @@ nos campos "Sequência" das abas Visualização e Modelo 3D.
 - Fecha via Escape ou clique na sobreposição; montado via `<Teleport to="body">`
 - Integrado em `VisualizationView.vue` e `Model3DView.vue`
 
+### Fase 8 — Suporte a Docker ✅
+
+Permitir execução do sistema em container sem instalar Python, Node.js ou `uv`
+no host. Uso opcional e totalmente compatível com o modo nativo (`uv run glifo-gui`).
+
+**Arquivos criados em `docker/`:**
+- `Dockerfile` — build multi-stage com foco em cache de camadas:
+  1. `frontend-build` (node:22-slim): `npm ci` → `npm run build` → gera `dist/`
+  2. `python-deps` (python:3.12-slim + uv): copia apenas `pyproject.toml` + `uv.lock`;
+     `uv sync --frozen --no-dev --no-install-project` (cache quebrado só com `uv.lock`)
+  3. `final`: copia `.venv/` + código-fonte, `uv sync --frozen --no-dev`, copia `dist/`
+- `docker-compose.yml` — sobe o serviço na porta 8080; volume `./output:/app/output`
+- `manage.sh` — wrapper com comandos: `build / up / down / restart / logs / shell / status / clean`
+- `.dockerignore` — na raiz do projeto; exclui `.venv/`, `frontend/dist/`, `output/`, `tests/`, etc.
+
+**Resultado dos testes:**
+- Build: 17.7 s (primeiro build); rebuild sem mudança de deps < 2 s (cache 100%)
+- `GET /api/analysis/status` → `{"status":"idle"}` ✔
+- `GET /api/analysis/glyphs` → 145 glifos ELIS ✔
+
 ---
 
 ## Ordem de execução recomendada
@@ -165,4 +195,5 @@ impl   → Fase 1 (backend)          ✅ concluída
        → Fase 5 (params análise)   ✅ concluída
        → Fase 6 (autoria/citação)  ✅ concluída
        → Fase 7 (GlyphPickerModal) ✅ concluída
+       → Fase 8 (Docker)           ✅ concluída
 ```
