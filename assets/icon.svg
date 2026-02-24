@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Grade de pinos táteis — referência ao dispositivo matricial -->
+  <rect width="48" height="48" rx="8" fill="#6a1b9a"/>
+  <!-- Linha 1 -->
+  <circle cx="12" cy="12" r="4" fill="white" opacity="0.95"/>
+  <circle cx="24" cy="12" r="4" fill="white" opacity="0.95"/>
+  <circle cx="36" cy="12" r="4" fill="white" opacity="0.3"/>
+  <!-- Linha 2 -->
+  <circle cx="12" cy="24" r="4" fill="white" opacity="0.95"/>
+  <circle cx="24" cy="24" r="4" fill="white" opacity="0.3"/>
+  <circle cx="36" cy="24" r="4" fill="white" opacity="0.95"/>
+  <!-- Linha 3 -->
+  <circle cx="12" cy="36" r="4" fill="white" opacity="0.3"/>
+  <circle cx="24" cy="36" r="4" fill="white" opacity="0.95"/>
+  <circle cx="36" cy="36" r="4" fill="white" opacity="0.95"/>
+</svg>
