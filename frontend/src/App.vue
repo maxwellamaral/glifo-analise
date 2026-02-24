@@ -13,6 +13,19 @@
     <main class="app-main">
       <RouterView />
     </main>
+    <footer class="app-footer">
+      <span>
+        © 2025–2026
+        <a href="https://github.com/maxwellamaral/glifo-analise" target="_blank" rel="noopener"
+           title="Repositório do projeto">
+          Maxwell Anderson Ielpo do Amaral
+        </a>
+        — ELIS Glifo Analyser
+      </span>
+      <span class="footer-license">
+        Licença MIT · Uso livre com atribuição ao autor
+      </span>
+    </footer>
   </div>
 </template>
 
@@ -80,5 +93,29 @@ body {
 .app-main {
   padding: 1.5rem;
   flex: 1;
+}
+
+.app-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--accent);
+  padding: .6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem;
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+.app-footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+.app-footer a:hover { text-decoration: underline; }
+
+.footer-license {
+  font-size: .73rem;
+  opacity: .7;
 }
 </style>

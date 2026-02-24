@@ -705,3 +705,52 @@ a capacidade sequencial mínima:
 
 > **8×12 @ 3,5 mm — célula 24,5 × 38,5 mm — 99,2% — até 6 glifos/tira**
 
+---
+
+## Autoria e Citação
+
+**Autor:** Maxwell Anderson Ielpo do Amaral  
+**Criação:** 2025  
+**Repositório:** [github.com/maxwellamaral/glifo-analise](https://github.com/maxwellamaral/glifo-analise)
+
+Se você utilizar este software, suas saídas ou sua metodologia em trabalhos acadêmicos, publicações, apresentações ou produtos derivados, **cite o autor** conforme os formatos abaixo.
+
+> O arquivo [`CITATION.bib`](CITATION.bib) contém entradas prontas para BibLaTeX e ABNT.  
+> O arquivo [`CITATION.cff`](CITATION.cff) é reconhecido automaticamente pelo GitHub,
+> exibindo o botão **"Cite this repository"** com formatos APA e BibTeX gerados na hora.
+
+### Formato ABNT
+
+> AMARAL, Maxwell Anderson Ielpo do. **Glifo Análise — Viabilidade Tátil para Dispositivo Matricial ELIS**. 2025. Disponível em: https://github.com/maxwellamaral/glifo-analise. Acesso em: \<data de acesso>.
+
+### Formato APA
+
+> Amaral, M. A. I. do. (2025). *Glifo Análise — Viabilidade Tátil para Dispositivo Matricial ELIS* [Software]. GitHub. https://github.com/maxwellamaral/glifo-analise
+
+### Formato BibLaTeX
+
+```bibtex
+@software{amaral2025glifo,
+  author    = {Amaral, Maxwell Anderson Ielpo do},
+  title     = {Glifo Análise --- Viabilidade Tátil para Dispositivo Matricial {ELIS}},
+  year      = {2025},
+  url       = {https://github.com/maxwellamaral/glifo-analise},
+  license   = {MIT},
+  langid    = {brazilian},
+}
+```
+
+---
+
+## Licença
+
+Este projeto é distribuído sob a licença **MIT com cláusula de atribuição**.
+
+Uso gratuito — inclusive comercial — mediante **menção obrigatória ao autor** em qualquer publicação, produto ou trabalho derivado.
+
+```
+Copyright (c) 2025–2026 Maxwell Anderson Ielpo do Amaral
+```
+
+Veja o arquivo [LICENSE](LICENSE) para o texto completo.
+

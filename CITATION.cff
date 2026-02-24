@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: >
+  Se você utilizar este software, suas saídas ou sua metodologia,
+  por favor cite-o conforme os metadados abaixo.
+
+title: "Glifo Análise — Viabilidade Tátil para Dispositivo Matricial ELIS"
+version: 1.0.0
+date-released: "2025-01-01"
+
+authors:
+  - family-names: Amaral
+    given-names: Maxwell Anderson Ielpo do
+    orcid: "0000-0003-0126-035X"
+    affiliation: ""
+
+abstract: >
+  Ferramenta de análise de resolução mínima de células táteis para sinais ELIS
+  (Escrita das Línguas de Sinais) em dispositivos matriciais de pinos.
+  Implementa avaliação psicofísica de 145 glifos da fonte ELIS segundo a norma
+  ISO 11548-2, com pipeline FastAPI + Vue 3, geração de modelos 3D imprimíveis
+  (.3mf / .stl) e interface web com visualizador Three.js.
+
+keywords:
+  - tátil
+  - ELIS
+  - Língua de Sinais Brasileira
+  - Libras
+  - dispositivo matricial
+  - viabilidade tátil
+  - análise de resolução
+  - acessibilidade
+  - Braille
+  - ISO 11548-2
+
+license: MIT
+repository-code: "https://github.com/maxwellamaral/glifo-analise"
+url: "https://github.com/maxwellamaral/glifo-analise"
+
+preferred-citation:
+  type: software
+  title: "Glifo Análise — Viabilidade Tátil para Dispositivo Matricial ELIS"
+  authors:
+    - family-names: Amaral
+      given-names: Maxwell Anderson Ielpo do
+  year: 2025
+  url: "https://github.com/maxwellamaral/glifo-analise"
+  license: MIT
