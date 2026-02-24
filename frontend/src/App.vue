@@ -5,6 +5,7 @@
       <nav class="app-nav">
         <RouterLink to="/analysis">Análise</RouterLink>
         <RouterLink to="/candidates">Candidatos</RouterLink>
+        <RouterLink to="/detail">Detalhamento</RouterLink>
         <RouterLink to="/visualization">Visualização</RouterLink>
         <RouterLink to="/model3d">Modelo 3D</RouterLink>
       </nav>

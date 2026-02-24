@@ -374,7 +374,7 @@ glifo-analise/
 │       ├── ws.py             ← WebSocketManager (broadcast de progresso)
 │       └── routes/
 │           ├── analysis.py       ← POST /api/analysis/run, GET /api/analysis/status
-│           ├── candidates.py     ← GET /api/candidates
+│           ├── candidates.py     ← GET /api/candidates, GET /api/candidates/detail/{rank}
 │           ├── visualization.py  ← POST /api/visualization/generate
 │           ├── model3d.py        ← POST /api/model3d/generate, GET /api/model3d/files
 │           └── files.py          ← GET /output/{filename}
@@ -384,7 +384,7 @@ glifo-analise/
 │   │   ├── App.vue           ← layout principal com nav tabs
 │   │   ├── router/index.ts
 │   │   ├── stores/           ← analysis.ts, candidates.ts, model3d.ts (Pinia)
-│   │   └── views/            ← AnalysisView, CandidatesView, VisualizationView, Model3DView
+│   │   └── views/            ← AnalysisView, CandidatesView, DetailView, VisualizationView, Model3DView
 │   ├── public/static/        ← viewer3d.html + Three.js + elis.ttf
 │   └── dist/                 ← build de produção (gerado por `npm run build`)
 ├── tests/                    ← 146 testes (TDD Red-Green-Refactor)
@@ -501,9 +501,91 @@ uv run glifo-gui    # abre em http://localhost:8080
 | Aba | Funcionalidade |
 |-----|---------------|
 | **Análise** | Dispara o pipeline completo com log em streaming via WebSocket e barra de progresso |
-| **Candidatos** | Tabela interativa de candidatos viáveis; detalhes ISO 11548-2 por candidato |
+| **Candidatos** | Tabela interativa de candidatos viáveis; detalhes ISO 11548-2 básicos por candidato |
+| **Detalhamento** | Painel técnico completo do candidato selecionado: conformidade ISO 11548-2, métricas derivadas (gap, razão espaç/diâm, relação de aspecto, área de célula), análise econômica por tier de cobertura, larguras de tira para N glifos e notas de fabricação para dispositivo tátil dinâmico |
 | **Visualização** | Gera strip, cells ou grade de glifos em PNG; preview em linha |
 | **Modelo 3D** | Seleciona candidato e sequência, gera STL/3MF e abre o viewer Three.js no browser |
+
+---
+
+## Fluxo de Pesquisa — Avaliação Tátil com Pessoas Cegas e Surdocegas
+
+O objetivo final é validar se pessoas cegas e surdocegas conseguem compreender os sinais ELIS impressos em relevo e, caso bem-sucedido, fabricar um dispositivo tátil com pinos dinâmicos. O fluxo recomendado é:
+
+### 1. Seleção do candidato de protótipo
+
+1. Execute a **Análise** pela aba correspondente.
+2. Na aba **Candidatos**, ordene por cobertura e identifique os candidatos com 100% de cobertura.
+3. Clique em **Ver Detalhe** para abrir a aba **Detalhamento** do candidato.
+4. Verifique todos os **critérios ISO 11548-2** (idealmente todos aprovados).
+5. Avalie as **notas de fabricação**: número de pinos, mode tátil e gap entre pinos.
+6. Selecione o candidato com melhor equilíbrio entre economia (menor área) e discriminabilidade (maior gap).
+
+> **Recomendação inicial:** Candidato #1 (13×13 @ 2,5 mm) — 100% cobertura, 1-dedo, 9/9 ISO aprovados.
+
+### 2. Geração do protótipo físico
+
+```bash
+# Aba Modelo 3D → gerar arquivo .3mf para impressora FDM
+# Sequência sugerida para teste com 5 sinais contrastantes:
+tqlDà
+```
+
+O arquivo gerado em `./output/` está pronto para fatiar em:
+- **Bambu Studio / PrusaSlicer / OrcaSlicer** (`.3mf` nativo)
+- **Cura / Simplify3D** (`.stl` universal)
+
+Parâmetros de impressão recomendados para PLA:
+| Parâmetro | Valor |
+|-----------|-------|
+| Altura de camada | 0,1 mm (detalhe dos pinos) |
+| Preenchimento | 60% (rigidez da placa) |
+| Temperatura bico | 210 °C |
+| Temperatura mesa | 60 °C |
+
+### 3. Protocolo de avaliação tátil
+
+**Participantes:** Pessoas cegas congênitas com experiência em leitura tátil (Braille ou similar) e pessoas surdocegas.
+
+**Procedimento sugerido:**
+1. Apresente a tira impressa sem mostrar visualmente os sinais.
+2. Solicite ao participante que explore livremente com um dedo (candidato 1-dedo) ou dois dedos (candidato multi-dedo).
+3. Registre o tempo de reconhecimento por sinal e a resposta do participante.
+4. Após o reconhecimento espontâneo, apresente o sinal visualmente e peça confirmação.
+
+**Métricas de avaliação:**
+| Métrica | Meta |
+|---------|------|
+| Taxa de reconhecimento correto | ≥ 80% |
+| Tempo médio por sinal | ≤ 5 s |
+| Confusões sistemáticas entre sinais | < 10% |
+| Satisfação subjetiva (escala Likert 1–5) | ≥ 4 |
+
+**Sinais mais críticos para incluir no protocolo** (conforme análise):
+- Minúsculas i, r, s — histórico de PERDA_ESTRUTURAL em 10×10
+- Sinais com baixa densidade (próximos ao limiar de 3%)
+- Pares de sinais visualmente similares na grade
+
+### 4. Refinamento e fabricação do dispositivo dinâmico
+
+Após aprovação nos testes com protótipo estático, o próximo passo é fabricar um **display de pinos dinâmicos**. Considerações arquiteturais:
+
+| Aspecto | Candidato 1-dedo (13×13 @ 2,5 mm) | Candidato econômico (8×8 @ 2,5 mm) |
+|---------|-----------------------------------|--------------------------------------|
+| Pinos por célula | 169 | 64 |
+| Área da célula | 22,5 × 22,5 mm | 17,5 × 17,5 mm |
+| Cobertura | 100% | 98,4% |
+| Tecnologia sugerida | SMA ou actuador piezo | Piezo ou micromotor |
+| Custo relativo | Alto (mais pinos) | Baixo (menos pinos) |
+
+**Tecnologias de atuação viáveis para pinos dinâmicos:**
+- **Liga de Memória de Forma (SMA)** — silencioso, compacto; requer controle térmico
+- **Piezoeléctrico** — resposta rápida; custo elevado por pino
+- **Micromotor + came** — robusto; maior dimensão mecânica
+- **Pneumático/Hidráulico (MEMS)** — alta precisão; complexidade de fabricação
+
+O sistema de software (FastAPI + Vue 3) já está preparado para evoluir para controle direto do dispositivo dinâmico: o backend pode emitir comandos via WebSocket para um firmware embarcado, enquanto a interface gráfica serve como painel de geração e preview dos padrões táteis.
+
 
 **Arquitetura:**
 - **Backend** `glifo_analise/api/` — FastAPI + WebSocket para progresso em tempo real

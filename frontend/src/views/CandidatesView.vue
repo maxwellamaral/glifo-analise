@@ -64,7 +64,10 @@
               <td>{{ c.coverage_pct.toFixed(1) }}%</td>
               <td>{{ c.reading_mode }}</td>
               <td>{{ c.seq_capacity }}</td>
-              <td><button class="btn-sm" @click.stop="store.select(c)">Selecionar</button></td>
+              <td>
+                <button class="btn-sm" @click.stop="store.select(c)">Selecionar</button>
+                <button class="btn-sm btn-detail" @click.stop="selectAndDetail(c)">Ver Detalhe</button>
+              </td>
             </tr>
             <tr v-if="!filtered.length">
               <td colspan="7" class="muted" style="text-align:center; padding: 1rem;">
@@ -95,11 +98,18 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCandidatesStore } from '@/stores/candidates'
 import type { Candidate } from '@/stores/candidates'
 
 const store = useCandidatesStore()
+const router = useRouter()
 onMounted(() => store.fetch())
+
+function selectAndDetail(c: Candidate) {
+  store.select(c)
+  router.push('/detail')
+}
 
 // ── Filtro ────────────────────────────────────────────────────────────────
 const filterText = ref('')
@@ -227,6 +237,8 @@ tr:hover td { background: rgba(255,255,255,.03); cursor: pointer; }
 .sort-icon.active { color: var(--primary); opacity: 1; }
 
 .btn-sm { background: var(--accent); color: var(--text); border: none; border-radius: 4px; padding: .2rem .6rem; cursor: pointer; font-size: .8rem; }
+.btn-sm + .btn-sm { margin-left: .3rem; }
+.btn-detail { background: rgba(233,69,96,.2); color: var(--primary); border: 1px solid var(--primary); }
 
 .card {
   background: var(--surface);
