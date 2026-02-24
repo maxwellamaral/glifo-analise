@@ -1,6 +1,6 @@
 site_name: Glifo Análise
 site_description: Análise de viabilidade tátil para dispositivo matricial — fonte ELIS
-site_author: Maxwell Amairal do Nascimento
+site_author: Maxwell Anderson Ielpo do Amaral
 site_url: https://maxwellamaral.github.io/glifo-analise/
 repo_url: https://github.com/maxwellamaral/glifo-analise
 repo_name: maxwellamaral/glifo-analise
@@ -45,7 +45,7 @@ nav:
       - Requisitos: specs/requisitos.md
       - Arquitetura: specs/arquitetura.md
       - Roadmap: specs/roadmap.md
-  - Galeria de Glifos: glifos.md
+  # - Galeria de Glifos: glifos.md
 
 markdown_extensions:
   - admonition
@@ -88,5 +88,5 @@ extra:
   generator: false
 
 copyright: >
-  Copyright &copy; 2024–2026 Maxwell Amairal do Nascimento —
+  Copyright &copy; 2024–2026 Maxwell Anderson Ielpo do Amaral —
   <a href="https://github.com/maxwellamaral/glifo-analise/blob/main/LICENSE">Licença MIT</a>

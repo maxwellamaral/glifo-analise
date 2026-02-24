@@ -88,6 +88,64 @@ $$L_{física}(N) = (N - 1) \times d_{pino}$$
 
 ---
 
+## Modos de Leitura Estendidos
+
+Além da leitura com **um único dedo** em células 10×10, o sistema suporta
+dois modos adicionais voltados a usuários que empregam múltiplos dedos
+ou realizam **varrimento sequencial** de uma tira de glifos.
+
+### 1. Leitura com múltiplos dedos
+
+Quando a célula excede 25 mm mas permanece dentro de 55 mm
+(equivalente a três dedos lado a lado), o usuário pode usar dois ou três
+dedos simultaneamente para explorar a forma. Esse modo permite resoluções
+maiores e, portanto, maior detalhe estrutural.
+
+```
+25 mm < dimensão_máxima ≤ 55 mm  →  modo multi-dedo
+```
+
+### 2. Varrimento sequencial de glifos
+
+O usuário desliza a mão horizontalmente sobre uma **tira de K glifos**
+dispostos lado a lado, lendo-os em sequência — exatamente como a leitura
+Braille em linha. O limite é a **envergadura da mão adulta**:
+
+$$K \leq \left\lfloor \frac{L_{mao} + g}{L_{cel} + g} \right\rfloor$$
+
+Onde:
+- $L_{mao} = 180\ \text{mm}$ — envergadura adulta (indicador a mindinho)
+- $g = 3\ \text{mm}$ — folga física entre células adjacentes
+- $L_{cel} = (M - 1) \times d_{pino}$ — largura física da célula ($M$ colunas)
+
+A tira deve conter entre $K_{min} = 4$ e $K_{max} = 6$ glifos para garantir
+contexto lexical suficiente sem sobrecarga de memória tátil de curto prazo.
+
+### 3. Varredura de espaçamentos (2,5 → 3,5 mm)
+
+O aumento do espaçamento entre pinos melhora a discriminabilidade tátil
+individual de cada pino, porém reduz a capacidade sequencial $K$.
+
+| Espaçamento | Fundamento |
+|-------------|------------|
+| **2,5 mm** | Mínimo normativo ISO 11548-2 |
+| **3,0 mm** | Compromisso conforto/detalhe |
+| **3,5 mm** | Máximo testado — máxima discriminabilidade |
+
+### 4. Resoluções assimétricas M×N
+
+Para glifos ELIS com predominância vertical, uma célula com $M < N$ oferece
+mais resolução vertical sem ampliar a largura — preservando a capacidade
+sequencial $K$. Os tamanhos físicos são calculados por eixo:
+
+$$L_{cel} = (M - 1) \times d_{pino}, \quad H_{cel} = (N - 1) \times d_{pino}$$
+
+O modo de leitura segue a maior dimensão:
+
+$$\text{modo} = \begin{cases} \text{1-dedo} & \max(L_{cel}, H_{cel}) \leq 25\ \text{mm} \\ \text{multi-dedo} & 25\ \text{mm} < \max \leq 55\ \text{mm} \\ \text{fora-de-alcance} & \max > 55\ \text{mm} \end{cases}$$
+
+---
+
 ## Critérios de Viabilidade Tátil
 
 Cada glifo é avaliado por **cinco critérios independentes**.
@@ -199,6 +257,58 @@ Para uso no dispositivo, recomenda-se ou:
 
 - Aumentar ligeiramente o font size (ex.: usar tamanho `N`) e re-testar, ou
 - Criar variantes simplificadas manuais para a grade 10×10.
+
+---
+
+## Resultados da Análise Estendida
+
+### Candidatos viáveis (top 25)
+
+Critérios: modo ≠ fora-de-alcance, $K \geq 4$ glifos/tira, cobertura ≥ 80%.
+
+| Resolução | Espaç. | L (mm) | A (mm) | Modo | Seq | Cobertura |
+|-----------|--------|--------|--------|------|-----|-----------|
+| **10×12** | **2,5 mm** | **22,5** | **27,5** | **multi-dedo** | **7** | **100,0%** |
+| 10×12 | 3,0 mm | 27,0 | 33,0 | multi-dedo | 6 | 100,0% |
+| 12×15 | 2,5 mm | 27,5 | 35,0 | multi-dedo | 6 | 100,0% |
+| 10×12 | 3,5 mm | 31,5 | 38,5 | multi-dedo | 5 | 100,0% |
+| 12×15 | 3,0 mm | 33,0 | 42,0 | multi-dedo | 5 | 100,0% |
+| 13×13 | 2,5 mm | 30,0 | 30,0 | multi-dedo | 5 | 100,0% |
+| 13×13 | 3,5 mm | 42,0 | 42,0 | multi-dedo | 4 | 100,0% |
+| 12×15 | 3,5 mm | 38,5 | 49,0 | multi-dedo | 4 | 100,0% |
+| 13×13 | 3,0 mm | 36,0 | 36,0 | multi-dedo | 4 | 100,0% |
+| 8×12 | 2,5 mm | 17,5 | 27,5 | multi-dedo | 8 | 99,2% |
+| 8×12 | 3,0 mm | 21,0 | 33,0 | multi-dedo | 7 | 99,2% |
+| 8×12 | 3,5 mm | 24,5 | 38,5 | multi-dedo | 6 | 99,2% |
+| 13×16 | 2,5 mm | 30,0 | 37,5 | multi-dedo | 5 | 99,2% |
+| 8×16 | 2,5 mm | 17,5 | 37,5 | multi-dedo | 8 | 98,5% |
+| 8×16 | 3,0 mm | 21,0 | 45,0 | multi-dedo | 7 | 98,5% |
+| 8×16 | 3,5 mm | 24,5 | 52,5 | multi-dedo | 6 | 98,5% |
+| **8×8** | **2,5 mm** | **17,5** | **17,5** | **1-dedo** | **8** | **98,4%** |
+| 8×8 | 3,0 mm | 21,0 | 21,0 | 1-dedo | 7 | 98,4% |
+| 8×8 | 3,5 mm | 24,5 | 24,5 | 1-dedo | 6 | 98,4% |
+| 15×15 | 2,5 mm | 35,0 | 35,0 | multi-dedo | 4 | 99,2% |
+
+### Recomendação para leitura sequencial
+
+> **Resolução recomendada: 10×12 @ 2,5 mm — célula 22,5 × 27,5 mm — 100% de cobertura**
+
+| Critério | Valor |
+|-------------|-------|
+| Cobertura | **100%** de todos os 145 glifos ELIS |
+| Glifos/tira | Até **7** (alvo: 4–6) |
+| Modo | Multi-dedo (dois dedos verticalmente) |
+| Largura | 22,5 mm — compatível com 1 dedo na horizontal |
+| Altura | 27,5 mm — requer 2 dedos verticalmente |
+| Espaçamento | 2,5 mm (ISO 11548-2) |
+
+A resolução 10×12 elimina os 3 glifos com PERDA_ESTRUTURAL presentes em 10×10
+(i, r, s) ao ampliar as 2 linhas extras de altura para renderização.
+
+Para **máximo espaçamento** (melhor discriminabilidade por pino) mantendo
+a capacidade sequencial mínima:
+
+> **8×12 @ 3,5 mm — célula 24,5 × 38,5 mm — 99,2% — até 6 glifos/tira**
 
 ---
 
@@ -505,6 +615,30 @@ glifo-analise/
 
 ---
 
+## Interface Gráfica (GUI)
+
+A interface é uma **SPA Vue 3** servida pelo backend FastAPI em `http://localhost:8080`.
+
+```bash
+# 1. Build do frontend (necessário apenas na primeira vez ou após mudanças)
+cd frontend && npm install && npm run build && cd ..
+
+# 2. Iniciar o servidor (backend + frontend juntos)
+uv run glifo-gui    # abre em http://localhost:8080
+```
+
+### Abas disponíveis
+
+| Aba | Funcionalidade |
+|-----|---------------|
+| **Análise** | Dispara o pipeline completo com log em streaming via WebSocket e barra de progresso |
+| **Candidatos** | Tabela interativa de candidatos viáveis; detalhes ISO 11548-2 básicos por candidato |
+| **Detalhamento** | Painel técnico completo do candidato selecionado: conformidade ISO 11548-2, métricas derivadas (gap, razão espaç/diâm, relação de aspecto, área de célula), análise econômica por tier de cobertura, larguras de tira para N glifos e notas de fabricação para dispositivo tátil dinâmico |
+| **Visualização** | Gera strip, cells ou grade de glifos em PNG; preview em linha |
+| **Modelo 3D** | Seleciona candidato e sequência, gera STL/3MF e abre o viewer Three.js no browser |
+
+---
+
 ## Geração de Protótipo 3D Tátil
 
 A partir de qualquer candidato da lista salva, o sistema pode gerar um
@@ -572,30 +706,6 @@ tatil_3d_<M>x<N>_<esp>mm_<sequência>.<fmt>
 |---------|-----------------|
 | `.3mf` | Bambu Studio, PrusaSlicer, Cura, OrcaSlicer |
 | `.stl` | Universal — todos os slicers |
-
----
-
-## Interface Gráfica (GUI)
-
-A interface é uma **SPA Vue 3** servida pelo backend FastAPI em `http://localhost:8080`.
-
-```bash
-# 1. Build do frontend (necessário apenas na primeira vez ou após mudanças)
-cd frontend && npm install && npm run build && cd ..
-
-# 2. Iniciar o servidor (backend + frontend juntos)
-uv run glifo-gui    # abre em http://localhost:8080
-```
-
-### Abas disponíveis
-
-| Aba | Funcionalidade |
-|-----|---------------|
-| **Análise** | Dispara o pipeline completo com log em streaming via WebSocket e barra de progresso |
-| **Candidatos** | Tabela interativa de candidatos viáveis; detalhes ISO 11548-2 básicos por candidato |
-| **Detalhamento** | Painel técnico completo do candidato selecionado: conformidade ISO 11548-2, métricas derivadas (gap, razão espaç/diâm, relação de aspecto, área de célula), análise econômica por tier de cobertura, larguras de tira para N glifos e notas de fabricação para dispositivo tátil dinâmico |
-| **Visualização** | Gera strip, cells ou grade de glifos em PNG; preview em linha |
-| **Modelo 3D** | Seleciona candidato e sequência, gera STL/3MF e abre o viewer Three.js no browser |
 
 ---
 
@@ -685,116 +795,6 @@ O sistema de software (FastAPI + Vue 3) já está preparado para evoluir para co
 
 > **GUI, CLI e API compartilham o mesmo núcleo de lógica** — sem duplicação de código.
 > Toda análise reside em `glifo_analise/analysis/` e `glifo_analise/output/`.
-
----
-
-## Modos de Leitura Estendidos
-
-Além da leitura com **um único dedo** em células 10×10, o sistema suporta
-dois modos adicionais voltados a usuários que empregam múltiplos dedos
-ou realizam **varrimento sequencial** de uma tira de glifos.
-
-### 1. Leitura com múltiplos dedos
-
-Quando a célula excede 25 mm mas permanece dentro de 55 mm
-(equivalente a três dedos lado a lado), o usuário pode usar dois ou três
-dedos simultaneamente para explorar a forma. Esse modo permite resoluções
-maiores e, portanto, maior detalhe estrutural.
-
-```
-25 mm < dimensão_máxima ≤ 55 mm  →  modo multi-dedo
-```
-
-### 2. Varrimento sequencial de glifos
-
-O usuário desliza a mão horizontalmente sobre uma **tira de K glifos**
-dispostos lado a lado, lendo-os em sequência — exatamente como a leitura
-Braille em linha. O limite é a **envergadura da mão adulta**:
-
-$$K \leq \left\lfloor \frac{L_{mao} + g}{L_{cel} + g} \right\rfloor$$
-
-Onde:
-- $L_{mao} = 180\ \text{mm}$ — envergadura adulta (indicador a mindinho)
-- $g = 3\ \text{mm}$ — folga física entre células adjacentes
-- $L_{cel} = (M - 1) \times d_{pino}$ — largura física da célula ($M$ colunas)
-
-A tira deve conter entre $K_{min} = 4$ e $K_{max} = 6$ glifos para garantir
-contexto lexical suficiente sem sobrecarga de memória tátil de curto prazo.
-
-### 3. Varredura de espaçamentos (2,5 → 3,5 mm)
-
-O aumento do espaçamento entre pinos melhora a discriminabilidade tátil
-individual de cada pino, porém reduz a capacidade sequencial $K$.
-
-| Espaçamento | Fundamento |
-|-------------|------------|
-| **2,5 mm** | Mínimo normativo ISO 11548-2 |
-| **3,0 mm** | Compromisso conforto/detalhe |
-| **3,5 mm** | Máximo testado — máxima discriminabilidade |
-
-### 4. Resoluções assimétricas M×N
-
-Para glifos ELIS com predominância vertical, uma célula com $M < N$ oferece
-mais resolução vertical sem ampliar a largura — preservando a capacidade
-sequencial $K$. Os tamanhos físicos são calculados por eixo:
-
-$$L_{cel} = (M - 1) \times d_{pino}, \quad H_{cel} = (N - 1) \times d_{pino}$$
-
-O modo de leitura segue a maior dimensão:
-
-$$\text{modo} = \begin{cases} \text{1-dedo} & \max(L_{cel}, H_{cel}) \leq 25\ \text{mm} \\ \text{multi-dedo} & 25\ \text{mm} < \max \leq 55\ \text{mm} \\ \text{fora-de-alcance} & \max > 55\ \text{mm} \end{cases}$$
-
----
-
-## Resultados da Análise Estendida
-
-### Candidatos viáveis (top 25)
-
-Critérios: modo ≠ fora-de-alcance, $K \geq 4$ glifos/tira, cobertura ≥ 80%.
-
-| Resolução | Espaç. | L (mm) | A (mm) | Modo | Seq | Cobertura |
-|-----------|--------|--------|--------|------|-----|-----------|
-| **10×12** | **2,5 mm** | **22,5** | **27,5** | **multi-dedo** | **7** | **100,0%** |
-| 10×12 | 3,0 mm | 27,0 | 33,0 | multi-dedo | 6 | 100,0% |
-| 12×15 | 2,5 mm | 27,5 | 35,0 | multi-dedo | 6 | 100,0% |
-| 10×12 | 3,5 mm | 31,5 | 38,5 | multi-dedo | 5 | 100,0% |
-| 12×15 | 3,0 mm | 33,0 | 42,0 | multi-dedo | 5 | 100,0% |
-| 13×13 | 2,5 mm | 30,0 | 30,0 | multi-dedo | 5 | 100,0% |
-| 13×13 | 3,5 mm | 42,0 | 42,0 | multi-dedo | 4 | 100,0% |
-| 12×15 | 3,5 mm | 38,5 | 49,0 | multi-dedo | 4 | 100,0% |
-| 13×13 | 3,0 mm | 36,0 | 36,0 | multi-dedo | 4 | 100,0% |
-| 8×12 | 2,5 mm | 17,5 | 27,5 | multi-dedo | 8 | 99,2% |
-| 8×12 | 3,0 mm | 21,0 | 33,0 | multi-dedo | 7 | 99,2% |
-| 8×12 | 3,5 mm | 24,5 | 38,5 | multi-dedo | 6 | 99,2% |
-| 13×16 | 2,5 mm | 30,0 | 37,5 | multi-dedo | 5 | 99,2% |
-| 8×16 | 2,5 mm | 17,5 | 37,5 | multi-dedo | 8 | 98,5% |
-| 8×16 | 3,0 mm | 21,0 | 45,0 | multi-dedo | 7 | 98,5% |
-| 8×16 | 3,5 mm | 24,5 | 52,5 | multi-dedo | 6 | 98,5% |
-| **8×8** | **2,5 mm** | **17,5** | **17,5** | **1-dedo** | **8** | **98,4%** |
-| 8×8 | 3,0 mm | 21,0 | 21,0 | 1-dedo | 7 | 98,4% |
-| 8×8 | 3,5 mm | 24,5 | 24,5 | 1-dedo | 6 | 98,4% |
-| 15×15 | 2,5 mm | 35,0 | 35,0 | multi-dedo | 4 | 99,2% |
-
-### Recomendação para leitura sequencial
-
-> **Resolução recomendada: 10×12 @ 2,5 mm — célula 22,5 × 27,5 mm — 100% de cobertura**
-
-| Critério | Valor |
-|----------|-------|
-| Cobertura | **100%** de todos os 145 glifos ELIS |
-| Glifos/tira | Até **7** (alvo: 4–6) |
-| Modo | Multi-dedo (dois dedos verticalmente) |
-| Largura | 22,5 mm — compatível com 1 dedo na horizontal |
-| Altura | 27,5 mm — requer 2 dedos verticalmente |
-| Espaçamento | 2,5 mm (ISO 11548-2) |
-
-A resolução 10×12 elimina os 3 glifos com PERDA_ESTRUTURAL presentes em 10×10
-(i, r, s) ao ampliar as 2 linhas extras de altura para renderização.
-
-Para **máximo espaçamento** (melhor discriminabilidade por pino) mantendo
-a capacidade sequencial mínima:
-
-> **8×12 @ 3,5 mm — célula 24,5 × 38,5 mm — 99,2% — até 6 glifos/tira**
 
 ---
 
