@@ -24,3 +24,6 @@ output/*.png
 output/*.stl
 output/*.3mf
 !docs/glyphs/*.png  # Exceção para imagens de glifos na documentação
+
+# MkDocs — build gerado (publicado via gh-deploy, não versionado)
+site/
