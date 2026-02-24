@@ -20,6 +20,10 @@ glifo-analise/                    ← raiz do projeto
 ├── elis.ttf                      ← fonte ELIS (asset)
 ├── main.py                       ← shim CLI: `from glifo_analise.cli.main import main`
 ├── pyproject.toml
+├── LICENSE                       ← MIT com cláusula de atribuição
+├── CITATION.bib                  ← BibLaTeX (@software) + ABNT (@misc)
+├── CITATION.cff                  ← Citation File Format v1.2 (GitHub auto-detect)
+├── README.md                     ← inclui seções Autoria, Citação e Licença
 ├── specs/
 │
 ├── output/                       ← artefatos gerados (PNG, STL, 3MF, JSON)
@@ -85,6 +89,8 @@ glifo-analise/                    ← raiz do projeto
         └── routes/
             ├── __init__.py
             ├── analysis.py       ← POST /api/analysis/run  + GET /api/analysis/status
+            │                        + GET /api/analysis/params/defaults
+            │                        + GET /api/analysis/glyphs
             ├── candidates.py     ← GET /api/candidates
             ├── visualization.py  ← POST /api/visualization/generate
             ├── model3d.py        ← POST /api/model3d/generate + GET /api/model3d/files
@@ -220,3 +226,7 @@ Vue 3 (browser)                   FastAPI (backend)
 | Viewer3D como iframe estático | `viewer3d.html` (Three.js local) reutilizado via `postMessage({type:'loadModel'})` a partir de `Viewer3D.vue`. |
 | `AppState` thread-safe em `api/state.py` | Protege estado compartilhado entre requests com `threading.Lock`. |
 | CLI não é alterada | `uv run glifo-analise` continua 100% funcional e independente da GUI. |
+| `GlyphPickerModal.vue` via `<Teleport to="body">` | Z-index correto em qualquer contexto de empilhamento (fullscreen, modal aninhado). Fecha com Escape ou clique na sobreposição. |
+| `GET /api/analysis/glyphs` retorna glifos por grupo | Separa a lógica de categorização (Maiúsculas/Minúsculas/Dígitos/Símbolos/Estendidos) no backend, mantendo o frontend agnóstico à fonte ELIS. |
+| Parâmetros de análise via `GET /api/analysis/params/defaults` | Permite que o frontend carregue os valores padrão definidos em `config.py` sem hardcoding; parâmetros customizados passados no body de `POST /api/analysis/run`. |
+| `LICENSE` MIT + cláusula de atribuição | Compatível com uso acadêmico e pesquisa; `CITATION.cff` habilita botão de citação automático no GitHub. |

@@ -55,15 +55,42 @@ glifos são reproduzíveis respeitando limiares psicofísicos táteis (ISO 11548
   seleciona um candidato e exibe ficha ISO detalhada.
 - RF-07.3: Aba **Visualização** — galeria inline de PNGs gerados (grade + preview tátil);
   botão para gerar nova imagem a partir de um candidato (tira completa, células individuais
-  ou grade diagnóstica); clique para ampliar.
+  ou grade diagnóstica); clique para ampliar. Campo "Sequência" acompanhado de botão de
+  acesso ao Mapa de Glifos ELIS (RF-07.8).
 - RF-07.4: Aba **Modelo 3D** — escolha de candidato, sequência de glifos (fonte ELIS),
   formato (STL/3MF), checkbox "teste completo"; visualizador Three.js interativo embutido;
-  download direto do arquivo gerado.
+  download direto do arquivo gerado. Campo "Sequência" acompanhado de botão de acesso
+  ao Mapa de Glifos ELIS (RF-07.8).
 - RF-07.5: GUI e CLI compartilham o mesmo núcleo de lógica — sem duplicação de código.
 - RF-07.6: O backend FastAPI serve a SPA Vue (arquivos estáticos compilados em
   `frontend/dist/`) na rota `/`; rotas de API prefixadas em `/api/`.
 - RF-07.7: Progresso de operações longas (análise, geração 3D) comunicado via WebSocket
   (`/api/ws/progress`), com fallback para polling REST se conexão não disponível.
+- RF-07.8: **Mapa de Glifos ELIS** — modal estilo "Mapa de Caracteres" do Windows acessível
+  a partir das abas Visualização e Modelo 3D. Exibe exclusivamente os glifos mapeados na
+  fonte ELIS, organizados em abas por grupo (Todos / Maiúsculas / Minúsculas / Dígitos /
+  Símbolos / Estendidos). Clicar em um glifo insere-o imediatamente no campo "Sequência".
+  Painel de prévia lateral exibe o glifo em destaque com codepoint Unicode e grupo.
+  Suporta remoção do último glifo (Unicode-safe), limpeza total e confirmação. Fechamento
+  via tecla Escape ou clique na sobreposição.
+- RF-07.9: **Parâmetros configuráveis de análise** — painel colapsável na aba Análise
+  expõe os 9 parâmetros do núcleo Python (resoluções mín/máx de linhas e colunas,
+  espaçamento mín/máx, diâmetro de pino, limiar de cobertura, envergadura da mão).
+  Permite redefinir valores individualmente; botão "Restaurar padrões" retorna os valores
+  ao `GET /api/analysis/params/defaults`. Resumo dos valores ativos exibido quando o
+  painel está recolhido.
+
+### RF-08 — Autoria, citação e licença
+- RF-08.1: O repositório deve incluir arquivo `LICENSE` com licença MIT e cláusula de
+  atribuição obrigatória ao autor original.
+- RF-08.2: O repositório deve incluir `CITATION.bib` com entradas BibLaTeX (`@software`)
+  e ABNT (`@misc`) para citação acadêmica.
+- RF-08.3: O repositório deve incluir `CITATION.cff` (Citation File Format v1.2) para
+  detecção automática de citação pelo GitHub.
+- RF-08.4: O `README.md` deve conter seções "Autoria e Citação" e "Licença" com
+  exemplos de uso nos formatos APA, ABNT e BibLaTeX.
+- RF-08.5: A GUI deve exibir rodapé permanente com nome do autor, link e aviso de
+  copyright/licença.
 
 ---
 
@@ -78,5 +105,10 @@ glifos são reproduzíveis respeitando limiares psicofísicos táteis (ISO 11548
 | RNF-05 | Manutenibilidade | Nenhuma lógica de análise dentro de arquivos GUI ou CLI — apenas chamadas ao núcleo. |
 | RNF-06 | Manutenibilidade | Cobertura de testes ≥ 80% no núcleo (`analysis/`, `output/`, `models.py`, `config.py`). |
 | RNF-07 | Portabilidade | Suporte a Linux, macOS e WSL2 (Windows via WSL). |
+| RNF-08 | Padrões | Python 3.10+ com type hints; docstrings Google Style; `uv` como gerenciador de pacotes. |
+| RNF-09 | Segurança | GUI sem autenticação (uso local); não expor em redes públicas. |
+| RNF-10 | Licença | Código licenciado sob MIT com cláusula de atribuição; arquivos de citação acadêmica (`CITATION.bib`, `CITATION.cff`) incluídos no repositório. |
+| RNF-11 | Usabilidade | Mapa de Glifos ELIS (RF-07.8) deve exibir todos os glifos na fonte ELIS renderizados com `font-family: 'ELIS'`; interação por clique simples sem necessidade de arrastar ou confirmar para inserção imediata. |
+| RNF-12 | Usabilidade | Parâmetros de análise (RF-07.9) devem ter valores padrão carregados do backend; qualquer alteração persiste apenas na sessão corrente (sem escrita em disco). |
 | RNF-08 | Padrões | Python 3.10+ com type hints; docstrings Google Style; `uv` como gerenciador de pacotes. |
 | RNF-09 | Segurança | GUI sem autenticação (uso local); não expor em redes públicas. |

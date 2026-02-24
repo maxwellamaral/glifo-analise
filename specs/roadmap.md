@@ -10,6 +10,19 @@
 - ✅ **Fase 1 — Backend FastAPI** — **CONCLUÍDA** (47/47 testes Green)
 - ✅ **Fase 2 — Frontend Vue 3 + Vite** — **CONCLUÍDA** (build OK)
 - ✅ **Fase 3 — Integração e Build** — **CONCLUÍDA** (smoke test OK, servidor rodando em http://localhost:8080)
+- ✅ **Fase 5 — Parâmetros Configuráveis de Análise** — **CONCLUÍDA**
+  - `GET /api/analysis/params/defaults` expõe os 9 parâmetros do núcleo
+  - `POST /api/analysis/run` aceita `AnalysisParams` opcional no body
+  - Painel colapsável em `AnalysisView.vue` com 4 seções e botão "Restaurar padrões"
+- ✅ **Fase 6 — Autoria, Citação e Licença** — **CONCLUÍDA**
+  - `LICENSE` (MIT + cláusula de atribuição), `CITATION.bib` (BibLaTeX + ABNT), `CITATION.cff` (CFF v1.2)
+  - `README.md` com seções "Autoria e Citação" e "Licença"
+  - Rodapé permanente em `App.vue` com autor, copyright e badge de licença
+- ✅ **Fase 7 — Mapa de Glifos ELIS (GlyphPickerModal)** — **CONCLUÍDA**
+  - `GET /api/analysis/glyphs` retorna todos os glifos ELIS agrupados
+  - `GlyphPickerModal.vue` — modal estilo Character Map com abas por grupo,
+    painel de prévia, inserção imediata e remoção Unicode-safe
+  - Integrado em `VisualizationView.vue` e `Model3DView.vue`
 
 ---
 
@@ -89,13 +102,67 @@ Cobrir os fluxos principais:
 
 ---
 
+### Fase 5 — Parâmetros Configuráveis de Análise ✅
+
+Expor os parâmetros do núcleo Python na GUI para que o usuário possa customizá-los
+sem editar código ou reiniciar o servidor.
+
+**Backend:**
+- `AnalysisParams` (Pydantic) com os 9 parâmetros e seus padrões
+- `GET /api/analysis/params/defaults` → retorna defaults de `config.py`
+- `POST /api/analysis/run` aceita `params?: AnalysisParams` no body
+
+**Frontend:**
+- `AnalysisParams` interface + `fetchDefaults()` em `stores/analysis.ts`
+- Painel colapsável em `AnalysisView.vue` com 4 seções:
+  Resoluções, Espaçamento de Pinos, Parâmetros Físicos, Limiares
+- Resumo dos valores ativos quando recolhido; botão "Restaurar padrões"
+
+---
+
+### Fase 6 — Autoria, Citação e Licença ✅
+
+Formalizar propriedade intelectual e facilitar citação acadêmica.
+
+**Arquivos criados:**
+- `LICENSE` — MIT com cláusula de atribuição obrigatória ao autor original
+- `CITATION.bib` — BibLaTeX `@software` + `@misc` ABNT
+- `CITATION.cff` — Citation File Format v1.2 (GitHub exibe botão "Cite this repository")
+- `README.md` — seções "Autoria e Citação" (APA, ABNT, BibLaTeX) e "Licença"
+- `App.vue` — rodapé permanente com nome do autor, link e badge de licença
+
+---
+
+### Fase 7 — Mapa de Glifos ELIS (GlyphPickerModal) ✅
+
+Modal estilo "Mapa de Caracteres" do Windows para seleção de glifos ELIS
+nos campos "Sequência" das abas Visualização e Modelo 3D.
+
+**Backend:**
+- `GET /api/analysis/glyphs` → lista `[{codepoint, char, group}]` de todos os
+  glifos não-brancos mapeados na fonte ELIS, agrupados por categoria
+
+**Frontend — `GlyphPickerModal.vue`:**
+- Abas de grupo: Todos / Maiúsculas / Minúsculas / Dígitos / Símbolos / Estendidos
+- Grid `auto-fill 42 × 42px` com cada glifo renderizado em `font-family: 'ELIS'`
+- Painel de prévia lateral: glifo em 5rem + codepoint U+XXXX + nome do grupo
+- Inserção imediata ao clicar (emite `update:modelValue` sem precisar confirmar)
+- Botões: ⌫ (remove último glifo, Unicode-safe via spread), ✕ (limpar), Confirmar
+- Fecha via Escape ou clique na sobreposição; montado via `<Teleport to="body">`
+- Integrado em `VisualizationView.vue` e `Model3DView.vue`
+
+---
+
 ## Ordem de execução recomendada
 
 ```
 /plan  → detalhar testes unitários para a Fase 1 (rotas FastAPI)
 /test  → criar arquivos de teste para api/routes/*.py
-impl   → Fase 1 (backend)
-       → Fase 2 (frontend)
-       → Fase 3 (integração)
+impl   → Fase 1 (backend)          ✅ concluída
+       → Fase 2 (frontend)         ✅ concluída
+       → Fase 3 (integração)       ✅ concluída
        → Fase 4 (E2E, opcional)
+       → Fase 5 (params análise)   ✅ concluída
+       → Fase 6 (autoria/citação)  ✅ concluída
+       → Fase 7 (GlyphPickerModal) ✅ concluída
 ```
