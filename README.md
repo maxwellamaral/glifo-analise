@@ -172,11 +172,11 @@ estrutural ao reduzir para 10 pinos).
 
 ### Glifos com restrição em 10×10
 
-| Codepoint | Sinal | Veredicto | $\rho$ | IoU | $\varepsilon$ | Observação |
-|-----------|-------|-----------|--------|-----|--------------|------------|
-| U+0069 (i) | Minúscula i | PERDA_ESTRUTURAL | 0,100 | 0,097 | 0,300 | Forma distorcida ao reduzir |
-| U+0072 (r) | Minúscula r | PERDA_ESTRUTURAL | 0,040 | 0,000 | 0,140 | Sinal desaparece estruturalmente |
-| U+0073 (s) | Minúscula s | PERDA_ESTRUTURAL | 0,060 | 0,143 | 0,200 | IoU marginal (0,143 < 0,15) |
+| Codepoint | Glifo ELIS | Sinal | Veredicto | $\rho$ | IoU | $\varepsilon$ | Observação |
+|-----------|:----------:|-------|-----------|--------|-----|--------------|------------|
+| U+0069 (i) | <img src="docs/glyphs/minuscula_i.png" height="48" alt="glifo ELIS i"> | Minúscula i | PERDA_ESTRUTURAL | 0,100 | 0,097 | 0,300 | Forma distorcida ao reduzir |
+| U+0072 (r) | <img src="docs/glyphs/minuscula_r.png" height="48" alt="glifo ELIS r"> | Minúscula r | PERDA_ESTRUTURAL | 0,040 | 0,000 | 0,140 | Sinal desaparece estruturalmente |
+| U+0073 (s) | <img src="docs/glyphs/minuscula_s.png" height="48" alt="glifo ELIS s"> | Minúscula s | PERDA_ESTRUTURAL | 0,060 | 0,143 | 0,200 | IoU marginal (0,143 < 0,15) |
 
 Esses três sinais requerem **redesenho manual** para a grade 10×10,
 simplificando ou estilizando seus traços para garantir reconhecimento tátil.
@@ -184,8 +184,17 @@ simplificando ou estilizando seus traços para garantir reconhecimento tátil.
 ### Glifos marcados como VAZIO (ausência intencional de pinos)
 
 Vinte codepoints produzem $\rho < 3\%$ em 10×10, incluindo: o separador
-`SPACE` (U+0020) e minúsculas b, k, m, n, q. Esses sinais ELIS possuem
-geometria mínima que não produz marca tátil suficiente nesta resolução.
+`SPACE` (U+0020) e as minúsculas abaixo:
+
+| Codepoint | Glifo ELIS | Sinal |
+|-----------|:----------:|-------|
+| U+0062 (b) | <img src="docs/glyphs/minuscula_b.png" height="48" alt="glifo ELIS b"> | Minúscula b |
+| U+006B (k) | <img src="docs/glyphs/minuscula_k.png" height="48" alt="glifo ELIS k"> | Minúscula k |
+| U+006D (m) | <img src="docs/glyphs/minuscula_m.png" height="48" alt="glifo ELIS m"> | Minúscula m |
+| U+006E (n) | <img src="docs/glyphs/minuscula_n.png" height="48" alt="glifo ELIS n"> | Minúscula n |
+| U+0071 (q) | <img src="docs/glyphs/minuscula_q.png" height="48" alt="glifo ELIS q"> | Minúscula q |
+
+Esses sinais ELIS possuem geometria mínima que não produz marca tátil suficiente nesta resolução.
 Para uso no dispositivo, recomenda-se ou:
 
 - Aumentar ligeiramente o font size (ex.: usar tamanho `N`) e re-testar, ou
@@ -305,6 +314,83 @@ Saídas geradas em `./output/`:
 
 ---
 
+## Execução via Docker (opcional)
+
+> **Pré-requisito:** Docker ≥ 20 com o plugin `docker compose` (v5+).
+> Não é necessário ter Python, Node.js ou `uv` instalados localmente.
+
+Os arquivos de suporte estão na pasta `docker/`:
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `docker/Dockerfile` | Build multi-stage: Node (frontend) → Python/uv (deps) → imagem final |
+| `docker/docker-compose.yml` | Orquestração do container com volume para `./output/` |
+| `docker/manage.sh` | Script de gerenciamento com comandos de conveniência |
+| `.dockerignore` | Exclui artefatos desnecessários do contexto de build |
+
+### Comandos rápidos
+
+```bash
+# 1. Construir a imagem (necessário apenas na primeira vez ou após mudanças)
+./docker/manage.sh build
+
+# 2. Subir o container em background
+./docker/manage.sh up
+# → acesse http://localhost:8080
+
+# 3. Acompanhar logs
+./docker/manage.sh logs
+
+# 4. Parar o container
+./docker/manage.sh down
+```
+
+Ou diretamente com o Docker Compose, a partir da raiz do projeto:
+
+```bash
+docker compose -f docker/docker-compose.yml build
+docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml down
+```
+
+### Todos os comandos do `manage.sh`
+
+| Comando | Descrição |
+|---------|-----------|
+| `build` | Constrói (ou reconstrói) a imagem Docker |
+| `up` | Sobe o container em background |
+| `down` | Para e remove o container |
+| `restart` | Para e re-sobe o container |
+| `logs` | Acompanha os logs em tempo real |
+| `shell` | Abre bash dentro do container em execução |
+| `status` | Exibe status e health do container |
+| `clean` | Remove container + imagem + volumes |
+
+### Arquitetura da imagem (multi-stage)
+
+A imagem usa **3 estágios** para maximizar o cache do Docker:
+
+```
+Estágio 1 — frontend-build (node:22-slim)
+  COPY package.json + package-lock.json → npm ci   ← cache se deps não mudar
+  COPY src/ → npm run build → /app/frontend/dist/
+
+Estágio 2 — python-deps (python:3.12-slim + uv)
+  COPY pyproject.toml + uv.lock → uv sync --no-dev --no-install-project
+  ← cache se uv.lock não mudar
+
+Estágio 3 — final (python:3.12-slim + uv)
+  COPY .venv/ do estágio 2
+  COPY glifo_analise/ + elis.ttf → uv sync --no-dev  ← instala o projeto
+  COPY dist/ do estágio 1
+  CMD glifo-gui
+```
+
+Arquivos gerados (modelos 3D, PNGs) são persistidos em `./output/` via volume,
+ficando disponíveis no host mesmo após `docker compose down`.
+
+---
+
 ## Dependências
 
 | Pacote | Versão | Papel |
@@ -402,6 +488,11 @@ glifo-analise/
 │   ├── test_api_candidates.py
 │   ├── test_api_visualization.py
 │   └── test_api_model3d.py
+├── docker/                   ← suporte a execução em container (opcional)
+│   ├── Dockerfile            ← build multi-stage (Node → Python/uv → final)
+│   ├── docker-compose.yml    ← orquestração do container
+│   └── manage.sh             ← script: build / up / down / logs / shell / clean
+├── .dockerignore             ← exclui artefatos do contexto de build
 ├── specs/                    ← especificações do projeto
 │   ├── requirements.md
 │   ├── architecture.md
