@@ -56,11 +56,18 @@ glifos são reproduzíveis respeitando limiares psicofísicos táteis (ISO 11548
 - RF-07.3: Aba **Visualização** — galeria inline de PNGs gerados (grade + preview tátil);
   botão para gerar nova imagem a partir de um candidato (tira completa, células individuais
   ou grade diagnóstica); clique para ampliar. Campo "Sequência" acompanhado de botão de
-  acesso ao Mapa de Glifos ELIS (RF-07.8).
+  acesso ao Mapa de Glifos ELIS (RF-07.8). Painel colapsável **"Arquivos gerados"** lista
+  todos os PNGs existentes em `output/`; clicar em um arquivo carrega-o diretamente no
+  visualizador; tooltip ao passar o mouse exibe nome, tipo (tira/células/grade),
+  tamanho e data de modificação; botão de exclusão individual com confirmação.
+  Endpoints: `GET /api/visualization/files` e `DELETE /api/visualization/files/{filename}`.
 - RF-07.4: Aba **Modelo 3D** — escolha de candidato, sequência de glifos (fonte ELIS),
   formato (STL/3MF), checkbox "teste completo"; visualizador Three.js interativo embutido;
   download direto do arquivo gerado. Campo "Sequência" acompanhado de botão de acesso
-  ao Mapa de Glifos ELIS (RF-07.8).
+  ao Mapa de Glifos ELIS (RF-07.8). Lista de arquivos gerados exibe metadados (formato,
+  tamanho, data) em tooltip ao passar o mouse; botão de exclusão individual com
+  confirmação. Endpoints: `GET /api/model3d/files` (retorna objetos com
+  `name/size/modified/format`) e `DELETE /api/model3d/files/{filename}`.
 - RF-07.5: GUI e CLI compartilham o mesmo núcleo de lógica — sem duplicação de código.
 - RF-07.6: O backend FastAPI serve a SPA Vue (arquivos estáticos compilados em
   `frontend/dist/`) na rota `/`; rotas de API prefixadas em `/api/`.

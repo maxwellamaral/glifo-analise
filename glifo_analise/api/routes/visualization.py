@@ -153,3 +153,57 @@ async def generate_visualization(
     else:  # "grid"
         return await loop.run_in_executor(None, _gen_grid, request, state)
 
+
+_PNG_EXTENSIONS = {".png"}
+
+
+@router.get("/files")
+async def list_visualization_files() -> List[Dict[str, Any]]:
+    """Lista todos os arquivos PNG no diretório de saída com metadados.
+
+    Returns:
+        Lista de objetos com ``name``, ``size`` e ``modified``.
+    """
+    from datetime import datetime
+
+    if not config.OUTPUT_DIR.exists():
+        return []
+
+    result = []
+    for p in sorted(
+        config.OUTPUT_DIR.iterdir(),
+        key=lambda x: x.stat().st_mtime,
+        reverse=True,
+    ):
+        if p.suffix.lower() in _PNG_EXTENSIONS:
+            stat = p.stat()
+            result.append({
+                "name": p.name,
+                "size": stat.st_size,
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            })
+    return result
+
+
+@router.delete("/files/{filename}")
+async def delete_visualization_file(filename: str) -> Dict[str, str]:
+    """Remove um arquivo PNG do diretório de saída.
+
+    Args:
+        filename: Nome do arquivo (sem caminho).
+
+    Returns:
+        ``{"deleted": "<filename>"}``
+    """
+    p = config.OUTPUT_DIR / filename
+    try:
+        p.resolve().relative_to(config.OUTPUT_DIR.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Caminho inválido.")
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="Arquivo não encontrado.")
+    if p.suffix.lower() not in _PNG_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Apenas arquivos PNG podem ser removidos por esta rota.")
+    p.unlink()
+    return {"deleted": filename}
+

@@ -2,8 +2,15 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 
+export interface Model3DFileInfo {
+  name: string
+  size: number
+  modified: string
+  format: string
+}
+
 export const useModel3DStore = defineStore('model3d', () => {
-  const files = ref<string[]>([])
+  const files = ref<Model3DFileInfo[]>([])
   const currentFile = ref<string | null>(null)
   const generating = ref(false)
   const error = ref<string | null>(null)
@@ -27,5 +34,11 @@ export const useModel3DStore = defineStore('model3d', () => {
     }
   }
 
-  return { files, currentFile, generating, error, fetchFiles, generate }
+  async function deleteFile(name: string) {
+    await axios.delete(`/api/model3d/files/${encodeURIComponent(name)}`)
+    files.value = files.value.filter(f => f.name !== name)
+    if (currentFile.value?.endsWith(name)) currentFile.value = null
+  }
+
+  return { files, currentFile, generating, error, fetchFiles, generate, deleteFile }
 })

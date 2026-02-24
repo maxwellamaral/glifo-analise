@@ -78,17 +78,52 @@ async def generate_model3d(
 
 
 @router.get("/files")
-async def list_model_files() -> List[str]:
-    """Lista todos os arquivos 3D (.3mf e .stl) no diretório de saída.
+async def list_model_files() -> List[Dict[str, Any]]:
+    """Lista todos os arquivos 3D (.3mf e .stl) no diretório de saída com metadados.
 
     Returns:
-        Lista de nomes de arquivo (ex: ``["modelo.3mf", "outro.stl"]``).
+        Lista de objetos com ``name``, ``size``, ``modified`` e ``format``.
     """
+    from datetime import datetime
+
     if not config.OUTPUT_DIR.exists():
         return []
 
-    return [
-        p.name
-        for p in sorted(config.OUTPUT_DIR.iterdir())
-        if p.suffix.lower() in _3D_EXTENSIONS
-    ]
+    result = []
+    for p in sorted(
+        config.OUTPUT_DIR.iterdir(),
+        key=lambda x: x.stat().st_mtime,
+        reverse=True,
+    ):
+        if p.suffix.lower() in _3D_EXTENSIONS:
+            stat = p.stat()
+            result.append({
+                "name": p.name,
+                "size": stat.st_size,
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                "format": p.suffix.lstrip(".").upper(),
+            })
+    return result
+
+
+@router.delete("/files/{filename}")
+async def delete_model_file(filename: str) -> Dict[str, str]:
+    """Remove um arquivo 3D do diretório de saída.
+
+    Args:
+        filename: Nome do arquivo (sem caminho).
+
+    Returns:
+        ``{"deleted": "<filename>"}``
+    """
+    p = config.OUTPUT_DIR / filename
+    try:
+        p.resolve().relative_to(config.OUTPUT_DIR.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Caminho inválido.")
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="Arquivo não encontrado.")
+    if p.suffix.lower() not in _3D_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Apenas arquivos 3D podem ser removidos por esta rota.")
+    p.unlink()
+    return {"deleted": filename}

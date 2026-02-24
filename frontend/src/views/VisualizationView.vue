@@ -87,6 +87,32 @@
           </div>
         </div>
       </div>
+
+      <!-- Arquivos PNG gerados -->
+      <div class="card mt-1 files-panel">
+        <div class="files-header" @click="visFilesOpen = !visFilesOpen">
+          <span class="files-title">Arquivos gerados ({{ visFiles.length }})</span>
+          <span class="files-toggle">{{ visFilesOpen ? '&#x25B2;' : '&#x25BC;' }}</span>
+        </div>
+        <ul v-if="visFilesOpen" class="vis-file-list">
+          <li
+            v-for="f in visFiles"
+            :key="f.name"
+            class="vis-file-item"
+            :class="{ active: result?.file === '/output/' + f.name }"
+            @click="loadVisFile(f.name)"
+            @mouseenter="showVisTooltip(f, $event)"
+            @mouseleave="hideVisTooltip"
+          >
+            <span class="file-item-name">{{ f.name }}</span>
+            <button
+              class="file-delete-btn"
+              title="Excluir arquivo"
+              @click.stop="confirmDeleteVisFile(f.name)"
+            >&#x1F5D1;</button>
+          </li>
+        </ul>
+      </div>
     </template>
 
     <!-- Mapa de glifos ELIS -->
@@ -100,6 +126,16 @@
           <img :src="lightboxSrc" class="lightbox-img" alt="" />
           <a :href="lightboxSrc" download class="btn-sm lb-dl">⬇ Download</a>
         </div>
+      </div>
+    </Teleport>
+
+    <!-- Tooltip de metadados de arquivo PNG -->
+    <Teleport to="body">
+      <div v-if="tooltipVis" class="file-tooltip" :style="tooltipVisStyle">
+        <div class="tt-row"><span class="tt-label">Arquivo</span><span class="tt-val">{{ tooltipVis.name }}</span></div>
+        <div class="tt-row"><span class="tt-label">Tipo</span><span class="tt-val">{{ parseVisFileType(tooltipVis.name) }}</span></div>
+        <div class="tt-row"><span class="tt-label">Tamanho</span><span class="tt-val">{{ formatVisSize(tooltipVis.size) }}</span></div>
+        <div class="tt-row"><span class="tt-label">Modificado</span><span class="tt-val">{{ formatVisDate(tooltipVis.modified) }}</span></div>
       </div>
     </Teleport>
   </div>
@@ -139,6 +175,7 @@ async function generate() {
     rotation.value = 0
     await nextTick()
     fitToView()
+    fetchVisFiles()
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : String(e)
   } finally {
@@ -260,7 +297,10 @@ function onKeyDown(e: KeyboardEvent) {
   }
 }
 
-onMounted(() => window.addEventListener('keydown', onKeyDown))
+onMounted(() => {
+  window.addEventListener('keydown', onKeyDown)
+  fetchVisFiles()
+})
 onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
 // ── Lightbox (cells) ─────────────────────────────────────────────────────
@@ -271,6 +311,59 @@ function openLightbox(src: string) {
 }
 function closeLightbox() {
   lightboxSrc.value = null
+}
+
+// ── Arquivos PNG existentes ───────────────────────────────────────────────────
+interface VisFileInfo { name: string; size: number; modified: string }
+const visFiles = ref<VisFileInfo[]>([])
+const visFilesOpen = ref(false)
+
+async function fetchVisFiles() {
+  try {
+    const r = await axios.get('/api/visualization/files')
+    visFiles.value = r.data
+  } catch { /* silencioso */ }
+}
+
+function loadVisFile(name: string) {
+  result.value = { file: `/output/${name}` }
+  scale.value = 1
+  tx.value = 0
+  ty.value = 0
+  rotation.value = 0
+  nextTick(() => fitToView())
+}
+
+async function confirmDeleteVisFile(name: string) {
+  if (!confirm(`Excluir "${name}"?`)) return
+  await axios.delete(`/api/visualization/files/${encodeURIComponent(name)}`)
+  visFiles.value = visFiles.value.filter(f => f.name !== name)
+  if (result.value?.file === `/output/${name}`) result.value = null
+}
+
+// ── Tooltip ────────────────────────────────────────────────────────────────
+const tooltipVis = ref<VisFileInfo | null>(null)
+const tooltipVisStyle = ref<Record<string, string>>({})
+
+function showVisTooltip(f: VisFileInfo, e: MouseEvent) {
+  tooltipVis.value = f
+  tooltipVisStyle.value = { top: `${e.clientY + 14}px`, left: `${e.clientX + 14}px` }
+}
+function hideVisTooltip() { tooltipVis.value = null }
+
+function parseVisFileType(name: string): string {
+  if (name.includes('strip')) return 'Tira completa'
+  if (name.includes('cell') || name.includes('_U')) return 'Células'
+  if (name.includes('grid')) return 'Grade diagnóstica'
+  return 'Preview'
+}
+function formatVisSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
+}
+function formatVisDate(iso: string): string {
+  return new Date(iso).toLocaleString('pt-BR')
 }
 </script>
 
@@ -449,4 +542,66 @@ h2 { margin: 0 0 .5rem; }
   line-height: 1; transition: border-color .15s;
 }
 .btn-picker:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── Painel de arquivos gerados ─────────────────────────────────────────── */
+.files-panel { padding: .65rem 1rem; }
+.files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: .1rem 0;
+}
+.files-title { font-size: .9rem; font-weight: 600; }
+.files-toggle { font-size: .75rem; color: var(--muted); }
+
+.vis-file-list { list-style: none; padding: 0; margin: .45rem 0 0; }
+.vis-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .35rem .5rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: .82rem;
+  cursor: pointer;
+  color: var(--muted);
+  gap: .5rem;
+  transition: background .12s, color .12s;
+}
+.vis-file-item:hover { background: var(--accent); color: var(--text); }
+.vis-file-item.active { background: var(--primary); color: #fff; }
+.file-item-name { flex: 1; word-break: break-all; }
+.file-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: .85rem;
+  padding: .1rem .3rem;
+  border-radius: 3px;
+  opacity: .45;
+  transition: opacity .15s, background .15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.file-delete-btn:hover { opacity: 1; background: rgba(255, 80, 80, .25); }
+
+/* ── Tooltip ─────────────────────────────────────────────────────────── */
+.file-tooltip {
+  position: fixed;
+  z-index: 99999;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: .6rem .85rem;
+  font-size: .8rem;
+  pointer-events: none;
+  box-shadow: 0 4px 18px rgba(0,0,0,.45);
+  min-width: 260px;
+}
+.tt-row { display: flex; gap: .5rem; margin-bottom: .25rem; }
+.tt-row:last-child { margin-bottom: 0; }
+.tt-label { color: var(--muted); min-width: 80px; flex-shrink: 0; }
+.tt-val { color: var(--text); word-break: break-all; }
 </style>

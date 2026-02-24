@@ -49,12 +49,19 @@
         <ul class="file-list">
           <li
             v-for="f in model3d.files"
-            :key="f"
+            :key="f.name"
             class="file-item"
-            :class="{ active: model3d.currentFile?.endsWith(f) }"
-            @click="loadFile(f)"
+            :class="{ active: model3d.currentFile?.endsWith(f.name) }"
+            @click="loadFile(f.name)"
+            @mouseenter="showTooltip(f, $event)"
+            @mouseleave="hideTooltip"
           >
-            {{ f }}
+            <span class="file-item-name">{{ f.name }}</span>
+            <button
+              class="file-delete-btn"
+              title="Excluir arquivo"
+              @click.stop="confirmDeleteFile(f.name)"
+            >&#x1F5D1;</button>
           </li>
         </ul>
       </div>
@@ -63,13 +70,22 @@
     <!-- Mapa de glifos ELIS -->
     <GlyphPickerModal v-if="showPicker" v-model="sequence" @close="showPicker = false" />
 
+    <!-- Tooltip de metadados do arquivo -->
+    <Teleport to="body">
+      <div v-if="tooltipFile" class="file-tooltip" :style="tooltipStyle">
+        <div class="tt-row"><span class="tt-label">Arquivo</span><span class="tt-val">{{ tooltipFile.name }}</span></div>
+        <div class="tt-row"><span class="tt-label">Formato</span><span class="tt-val">{{ tooltipFile.format }}</span></div>
+        <div class="tt-row"><span class="tt-label">Tamanho</span><span class="tt-val">{{ formatSize(tooltipFile.size) }}</span></div>
+        <div class="tt-row"><span class="tt-label">Modificado</span><span class="tt-val">{{ formatDate(tooltipFile.modified) }}</span></div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useCandidatesStore } from '@/stores/candidates'
-import { useModel3DStore } from '@/stores/model3d'
+import { useModel3DStore, type Model3DFileInfo } from '@/stores/model3d'
 import GlyphPickerModal from '@/components/GlyphPickerModal.vue'
 
 const candidates = useCandidatesStore()
@@ -93,6 +109,30 @@ async function gen() {
 
 function loadFile(name: string) {
   model3d.currentFile = `/output/${name}`
+}
+
+// ── Tooltip ──────────────────────────────────────────────────────────────
+const tooltipFile = ref<Model3DFileInfo | null>(null)
+const tooltipStyle = ref<Record<string, string>>({})
+
+function showTooltip(f: Model3DFileInfo, e: MouseEvent) {
+  tooltipFile.value = f
+  tooltipStyle.value = { top: `${e.clientY + 14}px`, left: `${e.clientX + 14}px` }
+}
+function hideTooltip() { tooltipFile.value = null }
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
+}
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString('pt-BR')
+}
+
+async function confirmDeleteFile(name: string) {
+  if (!confirm(`Excluir "${name}"?`)) return
+  await model3d.deleteFile(name)
 }
 
 onMounted(() => model3d.fetchFiles())
@@ -143,14 +183,51 @@ h3 { margin: 0 0 .5rem; font-size: 1rem; }
 
 .file-list { list-style: none; padding: 0; margin: 0; }
 .file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: .4rem .6rem;
   border-radius: 4px;
   font-family: monospace;
   font-size: .85rem;
   cursor: pointer;
   color: var(--muted);
+  gap: .5rem;
+  transition: background .12s, color .12s;
 }
 .file-item:hover, .file-item.active { background: var(--accent); color: var(--text); }
+.file-item-name { flex: 1; word-break: break-all; }
+.file-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: .85rem;
+  padding: .1rem .3rem;
+  border-radius: 3px;
+  opacity: .45;
+  transition: opacity .15s, background .15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.file-delete-btn:hover { opacity: 1; background: rgba(255, 80, 80, .25); }
+
+/* ── Tooltip ───────────────────────────────────────────────────── */
+.file-tooltip {
+  position: fixed;
+  z-index: 99999;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: .6rem .85rem;
+  font-size: .8rem;
+  pointer-events: none;
+  box-shadow: 0 4px 18px rgba(0,0,0,.45);
+  min-width: 260px;
+}
+.tt-row { display: flex; gap: .5rem; margin-bottom: .25rem; }
+.tt-row:last-child { margin-bottom: 0; }
+.tt-label { color: var(--muted); min-width: 80px; flex-shrink: 0; }
+.tt-val { color: var(--text); word-break: break-all; }
 
 .btn-sm {
   background: var(--accent); color: var(--text);
